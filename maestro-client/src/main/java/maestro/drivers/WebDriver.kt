@@ -99,9 +99,8 @@ class WebDriver(
                 val configJson = config.entries.joinToString(",") { (k, v) -> 
                     "\"$k\":\"$v\"" 
                 }
-                println("[DEBUG WebDriver] Injecting identifierConfig: {$configJson}")
                 executor.executeScript("window.maestro.identifierConfig = {$configJson}")
-            } ?: println("[DEBUG WebDriver] identifierConfig is null")
+            }
 
             injectedArguments.forEach { (key, value) ->
                 executor.executeScript("$key = '$value'")
@@ -242,8 +241,6 @@ class WebDriver(
                 is Number -> attributes[key] = value.toString()
             }
         }
-        
-        println("[DEBUG WebDriver parseDomAsTreeNodes] Parsed attributes: ${attributes.keys}")
 
         val children = domRepresentation["children"] as List<Map<String, Any>>
 

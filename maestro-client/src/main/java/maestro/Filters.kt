@@ -123,20 +123,9 @@ object Filters {
 
     fun customIdentifierMatches(attributeName: String, value: String): ElementFilter {
         return { nodes ->
-            println("[DEBUG Filters] Looking for attributeName='$attributeName' with value='$value'")
-            println("[DEBUG Filters] Total nodes to check: ${nodes.size}")
-            val matchedNodes = nodes.filter {
-                val hasAttribute = it.attributes[attributeName] == value
-                if (it.attributes.isNotEmpty()) {
-                    println("[DEBUG Filters] Node attributes: ${it.attributes.keys}")
-                    if (it.attributes.containsKey(attributeName)) {
-                        println("[DEBUG Filters]   Has '$attributeName' = '${it.attributes[attributeName]}' (looking for '$value')")
-                    }
-                }
-                hasAttribute
+            nodes.filter {
+                it.attributes[attributeName] == value
             }
-            println("[DEBUG Filters] Matched ${matchedNodes.size} nodes")
-            matchedNodes
         }
     }
 
