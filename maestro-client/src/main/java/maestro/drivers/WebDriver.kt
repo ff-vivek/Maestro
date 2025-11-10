@@ -49,6 +49,7 @@ class WebDriver(
     private var maestroWebScript: String? = null
     private var lastSeenWindowHandles = setOf<String>()
     private var injectedArguments: Map<String, Any> = emptyMap()
+    private var identifierConfig: Map<String, String>? = null
 
     private var webScreenRecorder: WebScreenRecorder? = null
 
@@ -92,6 +93,14 @@ class WebDriver(
 
         try {
             executor.executeScript("$maestroWebScript")
+
+            // Inject identifier config into browser
+            identifierConfig?.let { config ->
+                val configJson = config.entries.joinToString(",") { (k, v) -> 
+                    "\"$k\":\"$v\"" 
+                }
+                executor.executeScript("window.maestro.identifierConfig = {$configJson}")
+            }
 
             injectedArguments.forEach { (key, value) ->
                 executor.executeScript("$key = '$value'")
@@ -159,6 +168,10 @@ class WebDriver(
             widthGrid = width.toInt(),
             heightGrid = height.toInt(),
         )
+    }
+
+    fun setIdentifierConfig(config: Map<String, String>) {
+        this.identifierConfig = config
     }
 
     override fun launchApp(

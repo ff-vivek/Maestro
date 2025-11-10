@@ -55,6 +55,7 @@ class CdpWebDriver(
     private var maestroWebScript: String? = null
     private var lastSeenWindowHandles = setOf<String>()
     private var injectedArguments: Map<String, Any> = emptyMap()
+    private var identifierConfig: Map<String, String>? = null
 
     private var webScreenRecorder: WebScreenRecorder? = null
 
@@ -136,6 +137,14 @@ class CdpWebDriver(
 
                 cdpClient.evaluate("$maestroWebScript", target)
 
+                // Inject identifier config into browser
+                identifierConfig?.let { config ->
+                    val configJson = config.entries.joinToString(",") { (k, v) -> 
+                        "\"$k\":\"$v\"" 
+                    }
+                    cdpClient.evaluate("window.maestro.identifierConfig = {$configJson}", target)
+                }
+
                 injectedArguments.forEach { (key, value) ->
                     cdpClient.evaluate("$key = '$value'", target)
                 }
@@ -207,6 +216,10 @@ class CdpWebDriver(
             widthGrid = width,
             heightGrid = height,
         )
+    }
+
+    fun setIdentifierConfig(config: Map<String, String>) {
+        this.identifierConfig = config
     }
 
     override fun launchApp(

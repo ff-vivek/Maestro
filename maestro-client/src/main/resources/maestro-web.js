@@ -93,22 +93,19 @@
         return null;
       }
 
-      // Extract Flutter semantics identifier as a separate attribute (backwards compatibility)
-      const fltSemanticsId = node.getAttribute ? node.getAttribute('flt-semantics-identifier') : null
-      if (!!fltSemanticsId) {
-        attributes['flutterId'] = fltSemanticsId
-        // Also store with HTML attribute name for configurable identifier support
-        attributes['flt-semantics-identifier'] = fltSemanticsId
-      }
-
-      // Extract all data-* and flt-* attributes for custom identifier support
-      if (node.attributes) {
-        for (let i = 0; i < node.attributes.length; i++) {
-          const attr = node.attributes[i]
-          if (attr.name.startsWith('data-') || attr.name.startsWith('flt-')) {
-            // Store attribute with its HTML name for flexible configuration
-            if (!attributes[attr.name]) { // Don't override if already set
-              attributes[attr.name] = attr.value
+      // Extract custom identifiers based on configured attributes
+      // Only extract attributes that are explicitly configured in identifierConfig
+      if (node.getAttribute && maestro.identifierConfig) {
+        for (const htmlAttr in maestro.identifierConfig) {
+          const value = node.getAttribute(htmlAttr)
+          if (value !== null) {
+            // Store with HTML attribute name for filtering
+            attributes[htmlAttr] = value
+            
+            // Also store with YAML key for backwards compatibility (e.g., flutterId)
+            const yamlKey = maestro.identifierConfig[htmlAttr]
+            if (yamlKey) {
+              attributes[yamlKey] = value
             }
           }
         }
@@ -143,6 +140,11 @@
     maestro.viewportY = 0;
     maestro.viewportWidth = 0;
     maestro.viewportHeight = 0;
+    
+    // Default identifier configuration (backwards compatible with Flutter)
+    maestro.identifierConfig = maestro.identifierConfig || {
+        'flt-semantics-identifier': 'flutterId'
+    };
 
     maestro.getContentDescription = () => {
         return traverse(document.body)

@@ -206,6 +206,15 @@ class Orchestra(
         // Store config for use in filtering
         currentConfig = config
         
+        // Set identifier config on WebDriver/CdpWebDriver if available
+        config?.identifierConfig?.let { identifierConfig ->
+            val driver = maestro.driver
+            when (driver) {
+                is maestro.drivers.WebDriver -> driver.setIdentifierConfig(identifierConfig.mappings)
+                is maestro.drivers.CdpWebDriver -> driver.setIdentifierConfig(identifierConfig.mappings)
+            }
+        }
+        
         if (shouldReinitJsEngine) {
             initJsEngine(config)
         }
