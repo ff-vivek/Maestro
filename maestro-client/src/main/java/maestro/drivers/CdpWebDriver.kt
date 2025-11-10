@@ -269,8 +269,8 @@ class CdpWebDriver(
         if (attrs.containsKey("resource-id") && attrs["resource-id"] != null) {
             attributes["resource-id"] = attrs["resource-id"] as String
         }
-        if (attrs.containsKey("flutter-id") && attrs["flutter-id"] != null) {
-            attributes["flutter-id"] = attrs["flutter-id"] as String
+        if (attrs.containsKey("flutterId") && attrs["flutterId"] != null) {
+            attributes["flutterId"] = attrs["flutterId"] as String
         }
         if (attrs.containsKey("selected") && attrs["selected"] != null) {
             attributes["selected"] = (attrs["selected"] as Boolean).toString()

@@ -138,6 +138,8 @@ class Orchestra(
 
     private var copiedText: String? = null
 
+    private var currentConfig: MaestroConfig? = null
+
     private var timeMsOfLastInteraction = System.currentTimeMillis()
 
     private var screenRecording: ScreenRecording? = null
@@ -201,6 +203,9 @@ class Orchestra(
         config: MaestroConfig? = null,
         shouldReinitJsEngine: Boolean = true,
     ): Boolean {
+        // Store config for use in filtering
+        currentConfig = config
+        
         if (shouldReinitJsEngine) {
             initJsEngine(config)
         }
@@ -1253,6 +1258,19 @@ class Orchestra(
             ?.let {
                 descriptions += "Flutter ID: $it"
                 basicFilters += Filters.flutterIdMatches(it)
+            }
+
+        selector.customIdentifiers
+            ?.forEach { (yamlKey, value) ->
+                // Map YAML key to HTML attribute using identifierConfig
+                val htmlAttribute = currentConfig?.identifierConfig?.mappings
+                    ?.entries
+                    ?.find { it.value == yamlKey }
+                    ?.key
+                    ?: yamlKey // Fallback to using yamlKey directly if no mapping found
+                
+                descriptions += "Custom $yamlKey: $value"
+                basicFilters += Filters.customIdentifierMatches(htmlAttribute, value)
             }
 
         selector.size

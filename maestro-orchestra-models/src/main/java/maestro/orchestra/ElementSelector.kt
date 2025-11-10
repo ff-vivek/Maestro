@@ -26,6 +26,7 @@ data class ElementSelector(
     val textRegex: String? = null,
     val idRegex: String? = null,
     val flutterId: String? = null,
+    val customIdentifiers: Map<String, String>? = null, // New: map of custom identifier key-value pairs
     val size: SizeSelector? = null,
     val below: ElementSelector? = null,
     val above: ElementSelector? = null,
@@ -56,6 +57,7 @@ data class ElementSelector(
             textRegex = textRegex?.evaluateScripts(jsEngine),
             idRegex = idRegex?.evaluateScripts(jsEngine),
             flutterId = flutterId?.evaluateScripts(jsEngine),
+            customIdentifiers = customIdentifiers?.mapValues { it.value.evaluateScripts(jsEngine) },
             below = below?.evaluateScripts(jsEngine),
             above = above?.evaluateScripts(jsEngine),
             leftOf = leftOf?.evaluateScripts(jsEngine),
@@ -80,7 +82,11 @@ data class ElementSelector(
         }
 
         flutterId?.let {
-            descriptions.add("flutter-id: $it")
+            descriptions.add("flutterId: $it")
+        }
+
+        customIdentifiers?.forEach { (key, value) ->
+            descriptions.add("$key: $value")
         }
 
         enabled?.let {

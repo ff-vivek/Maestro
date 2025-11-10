@@ -93,10 +93,25 @@
         return null;
       }
 
-      // Extract Flutter semantics identifier as a separate attribute
+      // Extract Flutter semantics identifier as a separate attribute (backwards compatibility)
       const fltSemanticsId = node.getAttribute ? node.getAttribute('flt-semantics-identifier') : null
       if (!!fltSemanticsId) {
-        attributes['flutter-id'] = fltSemanticsId
+        attributes['flutterId'] = fltSemanticsId
+        // Also store with HTML attribute name for configurable identifier support
+        attributes['flt-semantics-identifier'] = fltSemanticsId
+      }
+
+      // Extract all data-* and flt-* attributes for custom identifier support
+      if (node.attributes) {
+        for (let i = 0; i < node.attributes.length; i++) {
+          const attr = node.attributes[i]
+          if (attr.name.startsWith('data-') || attr.name.startsWith('flt-')) {
+            // Store attribute with its HTML name for flexible configuration
+            if (!attributes[attr.name]) { // Don't override if already set
+              attributes[attr.name] = attr.value
+            }
+          }
+        }
       }
       
       if (!!node.id || !!node.ariaLabel || !!node.name || !!node.title || !!node.htmlFor || !!node.attributes['data-testid']) {
