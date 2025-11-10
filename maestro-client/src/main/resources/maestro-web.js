@@ -95,9 +95,11 @@
 
       // Extract custom identifiers based on configured attributes
       // Only extract attributes that are explicitly configured in identifierConfig
-      if (node.getAttribute && maestro.identifierConfig) {
+      if (node.getAttribute && maestro.identifierConfig && Object.keys(maestro.identifierConfig).length > 0) {
+        console.log('[DEBUG maestro-web.js] identifierConfig:', JSON.stringify(maestro.identifierConfig))
         for (const htmlAttr in maestro.identifierConfig) {
           const value = node.getAttribute(htmlAttr)
+          console.log('[DEBUG maestro-web.js] Node:', node.tagName, 'Checking attribute:', htmlAttr, 'value:', value)
           if (value !== null) {
             // Store with HTML attribute name for filtering
             attributes[htmlAttr] = value
@@ -106,8 +108,13 @@
             const yamlKey = maestro.identifierConfig[htmlAttr]
             if (yamlKey) {
               attributes[yamlKey] = value
+              console.log('[DEBUG maestro-web.js] ✓ Stored both:', htmlAttr, 'and', yamlKey, 'with value:', value)
             }
           }
+        }
+      } else {
+        if (node.tagName && node.tagName.toLowerCase() === 'input') {
+          console.log('[DEBUG maestro-web.js] INPUT element but identifierConfig is empty/missing. Config:', maestro.identifierConfig)
         }
       }
       
@@ -141,8 +148,8 @@
     maestro.viewportWidth = 0;
     maestro.viewportHeight = 0;
     
-    // Identifier configuration (set by user via YAML config)
-    maestro.identifierConfig = maestro.identifierConfig || {};
+    // Identifier configuration (set by driver, do NOT set default here)
+    // maestro.identifierConfig will be injected by WebDriver/CdpWebDriver
 
     maestro.getContentDescription = () => {
         return traverse(document.body)
