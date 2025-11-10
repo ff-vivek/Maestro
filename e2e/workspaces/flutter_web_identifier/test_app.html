@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flutter Web Identifier Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        flt-semantics {
+            display: block;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        flt-semantics[role="button"] {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+        }
+        
+        flt-semantics[role="button"]:hover {
+            background-color: #0056b3;
+        }
+        
+        flt-semantics[role="checkbox"] {
+            padding: 8px 12px;
+            background-color: #f8f9fa;
+        }
+        
+        input {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            box-sizing: border-box;
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 4px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Flutter Web Identifier Test Page</h1>
+    <p>This page simulates a Flutter web application with flt-semantics-identifier attributes.</p>
+    
+    <form id="testForm">
+        <!-- Text Field with Flutter identifier -->
+        <input 
+            type="text" 
+            id="flt-semantic-node-10"
+            flt-semantics-identifier="username_field"
+            aria-label="Username"
+            placeholder="Enter username">
+        
+        <!-- Another Text Field -->
+        <input 
+            type="text" 
+            id="flt-semantic-node-11"
+            flt-semantics-identifier="email_field"
+            aria-label="Email"
+            placeholder="Enter email">
+        
+        <!-- Button with Flutter identifier (stable) -->
+        <flt-semantics 
+            id="flt-semantic-node-42"
+            flt-semantics-identifier="submit_button"
+            role="button"
+            flt-tappable
+            onclick="handleSubmit()">
+            Submit Form
+        </flt-semantics>
+        
+        <!-- Another button with different auto-generated ID but stable identifier -->
+        <flt-semantics 
+            id="flt-semantic-node-99"
+            flt-semantics-identifier="cancel_button"
+            role="button"
+            flt-tappable
+            onclick="handleCancel()">
+            Cancel
+        </flt-semantics>
+        
+        <!-- Checkbox with identifier -->
+        <flt-semantics 
+            id="flt-semantic-node-50"
+            flt-semantics-identifier="agree_checkbox"
+            role="checkbox"
+            aria-checked="false"
+            flt-tappable
+            onclick="toggleCheckbox(this)">
+            I agree to the terms and conditions
+        </flt-semantics>
+        
+        <!-- Tab elements -->
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <flt-semantics 
+                id="flt-semantic-node-60"
+                flt-semantics-identifier="home_tab"
+                role="tab"
+                aria-selected="true"
+                flt-tappable
+                onclick="selectTab('home', this)">
+                Home
+            </flt-semantics>
+            
+            <flt-semantics 
+                id="flt-semantic-node-61"
+                flt-semantics-identifier="profile_tab"
+                role="tab"
+                aria-selected="false"
+                flt-tappable
+                onclick="selectTab('profile', this)">
+                Profile
+            </flt-semantics>
+            
+            <flt-semantics 
+                id="flt-semantic-node-62"
+                flt-semantics-identifier="settings_tab"
+                role="tab"
+                aria-selected="false"
+                flt-tappable
+                onclick="selectTab('settings', this)">
+                Settings
+            </flt-semantics>
+        </div>
+    </form>
+    
+    <div id="result" class="result"></div>
+    
+    <script>
+        function handleSubmit() {
+            const username = document.querySelector('[flt-semantics-identifier="username_field"]').value;
+            const email = document.querySelector('[flt-semantics-identifier="email_field"]').value;
+            const checkbox = document.querySelector('[flt-semantics-identifier="agree_checkbox"]');
+            const agreed = checkbox.getAttribute('aria-checked') === 'true';
+            
+            const result = document.getElementById('result');
+            result.innerHTML = `
+                <h3>Form Submitted Successfully!</h3>
+                <p>Username: ${username}</p>
+                <p>Email: ${email}</p>
+                <p>Agreed to terms: ${agreed ? 'Yes' : 'No'}</p>
+            `;
+            result.style.display = 'block';
+        }
+        
+        function handleCancel() {
+            document.querySelector('[flt-semantics-identifier="username_field"]').value = '';
+            document.querySelector('[flt-semantics-identifier="email_field"]').value = '';
+            const checkbox = document.querySelector('[flt-semantics-identifier="agree_checkbox"]');
+            checkbox.setAttribute('aria-checked', 'false');
+            checkbox.textContent = 'I agree to the terms and conditions';
+            
+            const result = document.getElementById('result');
+            result.style.display = 'none';
+        }
+        
+        function toggleCheckbox(element) {
+            const checked = element.getAttribute('aria-checked') === 'true';
+            element.setAttribute('aria-checked', (!checked).toString());
+            element.textContent = checked 
+                ? 'I agree to the terms and conditions'
+                : '✓ I agree to the terms and conditions';
+        }
+        
+        function selectTab(tabName, element) {
+            // Deselect all tabs
+            document.querySelectorAll('[role="tab"]').forEach(tab => {
+                tab.setAttribute('aria-selected', 'false');
+                tab.style.backgroundColor = '#f8f9fa';
+            });
+            
+            // Select clicked tab
+            element.setAttribute('aria-selected', 'true');
+            element.style.backgroundColor = '#007bff';
+            element.style.color = 'white';
+        }
+    </script>
+</body>
+</html>
+

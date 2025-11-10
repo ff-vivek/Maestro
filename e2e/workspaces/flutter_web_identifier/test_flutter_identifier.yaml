@@ -1,0 +1,67 @@
+# appId: file:////Users/kory/Projects/maestro/e2e/workspaces/flutter_web_identifier/test_app.html
+url: http://localhost:8083/test_app.html
+---
+# Test Flutter Web with flt-semantics-identifier support
+# This test demonstrates how Maestro can now use Flutter's stable identifiers
+
+- launchApp
+
+# Wait for page to load
+- assertVisible: "Flutter Web Identifier Test Page"
+
+# Test 1: Use flutter-id selector for Flutter identifiers on text fields
+- tapOn:
+    flutter-id: "username_field"
+- inputText: "testuser123"
+
+- tapOn:
+    flutter-id: "email_field"
+- inputText: "test@example.com"
+
+# Test 2: Use flutter-id selector for checkbox
+- tapOn:
+    flutter-id: "agree_checkbox"
+
+# Verify checkbox is checked
+- assertVisible: "✓ I agree to the terms and conditions"
+
+# Test 3: Use flutter-id selector for button
+- tapOn:
+    flutter-id: "submit_button"
+
+# Verify form submission
+- assertVisible: "Form Submitted Successfully!"
+- assertVisible: "Username: testuser123"
+- assertVisible: "Email: test@example.com"
+- assertVisible: "Agreed to terms: Yes"
+
+# Test 4: Use flutter-id selector for cancel button
+- tapOn:
+    flutter-id: "cancel_button"
+
+# Verify form is cleared
+- assertNotVisible: "Form Submitted Successfully!"
+
+# Test 5: Test tab selection using Flutter identifiers
+- tapOn:
+    flutter-id: "profile_tab"
+
+# Verify tab is selected (should have aria-selected="true")
+- assertVisible:
+    flutter-id: "profile_tab"
+    selected: true
+
+- tapOn:
+    flutter-id: "settings_tab"
+
+- assertVisible:
+    flutter-id: "settings_tab"
+    selected: true
+
+# Test 6: Combine flutter-id selector with other selectors
+- tapOn:
+    flutter-id: "submit_button"
+    enabled: true
+
+- assertVisible: "Form Submitted Successfully!"
+
