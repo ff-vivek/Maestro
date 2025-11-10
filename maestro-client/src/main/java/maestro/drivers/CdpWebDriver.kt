@@ -142,8 +142,9 @@ class CdpWebDriver(
                     val configJson = config.entries.joinToString(",") { (k, v) -> 
                         "\"$k\":\"$v\"" 
                     }
+                    println("[DEBUG CdpWebDriver] Injecting identifierConfig: {$configJson}")
                     cdpClient.evaluate("window.maestro.identifierConfig = {$configJson}", target)
-                }
+                } ?: println("[DEBUG CdpWebDriver] identifierConfig is null")
 
                 injectedArguments.forEach { (key, value) ->
                     cdpClient.evaluate("$key = '$value'", target)

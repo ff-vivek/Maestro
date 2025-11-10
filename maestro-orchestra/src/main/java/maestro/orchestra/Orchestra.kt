@@ -208,12 +208,13 @@ class Orchestra(
         
         // Set identifier config on WebDriver/CdpWebDriver if available
         config?.identifierConfig?.let { identifierConfig ->
+            println("[DEBUG Orchestra] Setting identifierConfig mappings: ${identifierConfig.mappings}")
             val driver = maestro.driver
             when (driver) {
                 is maestro.drivers.WebDriver -> driver.setIdentifierConfig(identifierConfig.mappings)
                 is maestro.drivers.CdpWebDriver -> driver.setIdentifierConfig(identifierConfig.mappings)
             }
-        }
+        } ?: println("[DEBUG Orchestra] No identifierConfig in MaestroConfig")
         
         if (shouldReinitJsEngine) {
             initJsEngine(config)
@@ -1271,6 +1272,9 @@ class Orchestra(
                     ?.find { it.value == yamlKey }
                     ?.key
                     ?: yamlKey // Fallback to using yamlKey directly if no mapping found
+                
+                println("[DEBUG Orchestra] Mapping yamlKey '$yamlKey' to htmlAttribute '$htmlAttribute' for value '$value'")
+                println("[DEBUG Orchestra] Current mappings: ${currentConfig?.identifierConfig?.mappings}")
                 
                 descriptions += "Custom $yamlKey: $value"
                 basicFilters += Filters.customIdentifierMatches(htmlAttribute, value)
