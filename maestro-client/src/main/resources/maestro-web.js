@@ -141,10 +141,8 @@
     maestro.viewportWidth = 0;
     maestro.viewportHeight = 0;
     
-    // Default identifier configuration (backwards compatible with Flutter)
-    maestro.identifierConfig = maestro.identifierConfig || {
-        'flt-semantics-identifier': 'flutterId'
-    };
+    // Identifier configuration (set by user via YAML config)
+    maestro.identifierConfig = maestro.identifierConfig || {};
 
     maestro.getContentDescription = () => {
         return traverse(document.body)

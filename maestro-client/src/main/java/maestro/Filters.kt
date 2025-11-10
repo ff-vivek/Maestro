@@ -121,14 +121,6 @@ object Filters {
         }
     }
 
-    fun flutterIdMatches(flutterId: String): ElementFilter {
-        return { nodes ->
-            nodes.filter {
-                it.attributes["flutterId"] == flutterId
-            }
-        }
-    }
-
     fun customIdentifierMatches(attributeName: String, value: String): ElementFilter {
         return { nodes ->
             nodes.filter {

@@ -1263,12 +1263,6 @@ class Orchestra(
                 basicFilters += Filters.idMatches(it.toRegexSafe(REGEX_OPTIONS))
             }
 
-        selector.flutterId
-            ?.let {
-                descriptions += "Flutter ID: $it"
-                basicFilters += Filters.flutterIdMatches(it)
-            }
-
         selector.customIdentifiers
             ?.forEach { (yamlKey, value) ->
                 // Map YAML key to HTML attribute using identifierConfig

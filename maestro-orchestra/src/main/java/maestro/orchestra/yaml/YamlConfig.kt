@@ -54,7 +54,7 @@ data class YamlConfig(
             onFlowStart = onFlowStart(flowPath),
             onFlowComplete = onFlowComplete(flowPath),
             identifierConfig = identifierConfig?.let { maestro.orchestra.IdentifierConfig(it) } 
-                ?: maestro.orchestra.IdentifierConfig.DEFAULT
+                ?: maestro.orchestra.IdentifierConfig()
         )
         return MaestroCommand(ApplyConfigurationCommand(config))
     }

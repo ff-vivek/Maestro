@@ -6,17 +6,12 @@ import maestro.orchestra.util.Env.evaluateScripts
 /**
  * Configuration for custom identifier mappings.
  * Allows users to map HTML attributes to Maestro YAML selector keys.
+ * 
+ * Example: Map HTML attribute "data-testid" to YAML key "testId"
  */
 data class IdentifierConfig(
     val mappings: Map<String, String> = emptyMap()
-) {
-    companion object {
-        // Default configuration maintains backwards compatibility with hardcoded flutterId
-        val DEFAULT = IdentifierConfig(
-            mappings = mapOf("flt-semantics-identifier" to "flutterId")
-        )
-    }
-}
+)
 
 // Note: The appId config is only a yaml concept for now. It'll be a larger migration to get to a point
 // where appId is part of MaestroConfig (and factored out of MaestroCommands - eg: LaunchAppCommand).
@@ -27,7 +22,7 @@ data class MaestroConfig(
     val ext: Map<String, Any?> = emptyMap(),
     val onFlowStart: MaestroOnFlowStart? = null,
     val onFlowComplete: MaestroOnFlowComplete? = null,
-    val identifierConfig: IdentifierConfig = IdentifierConfig.DEFAULT,
+    val identifierConfig: IdentifierConfig = IdentifierConfig(),
 ) {
 
     fun evaluateScripts(jsEngine: JsEngine): MaestroConfig {
