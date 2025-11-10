@@ -1248,6 +1248,13 @@ class Orchestra(
                 descriptions += "Id matching regex: $it"
                 basicFilters += Filters.idMatches(it.toRegexSafe(REGEX_OPTIONS))
             }
+
+        selector.flutterId
+            ?.let {
+                descriptions += "Flutter ID: $it"
+                basicFilters += Filters.flutterIdMatches(it)
+            }
+
         selector.size
             ?.let {
                 descriptions += "Size: $it"

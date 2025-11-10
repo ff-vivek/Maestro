@@ -93,6 +93,12 @@
         return null;
       }
 
+      // Extract Flutter semantics identifier as a separate attribute
+      const fltSemanticsId = node.getAttribute ? node.getAttribute('flt-semantics-identifier') : null
+      if (!!fltSemanticsId) {
+        attributes['flutter-id'] = fltSemanticsId
+      }
+      
       if (!!node.id || !!node.ariaLabel || !!node.name || !!node.title || !!node.htmlFor || !!node.attributes['data-testid']) {
         const title = typeof node.title === 'string' ? node.title : null
         attributes['resource-id'] = node.id || node.ariaLabel || node.name || title || node.htmlFor || node.attributes['data-testid']?.value

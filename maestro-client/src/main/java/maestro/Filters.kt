@@ -121,6 +121,14 @@ object Filters {
         }
     }
 
+    fun flutterIdMatches(flutterId: String): ElementFilter {
+        return { nodes ->
+            nodes.filter {
+                it.attributes["flutter-id"] == flutterId
+            }
+        }
+    }
+
     fun sizeMatches(
         width: Int? = null,
         height: Int? = null,

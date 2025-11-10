@@ -19,12 +19,14 @@
 
 package maestro.orchestra.yaml
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 
 @JsonDeserialize(`as` = YamlElementSelector::class)
 data class YamlElementSelector(
     val text: String? = null,
     val id: String? = null,
+    @JsonProperty("flutter-id") val flutterId: String? = null,
     val width: Int? = null,
     val height: Int? = null,
     val tolerance: Int? = null,

@@ -901,6 +901,7 @@ data class YamlFluentCommand(
         return ElementSelector(
             textRegex = selector.text,
             idRegex = selector.id,
+            flutterId = selector.flutterId,
             size = size,
             optional = selector.optional ?: false,
             below = selector.below?.let { toElementSelector(it) },
