@@ -276,25 +276,18 @@ class CdpWebDriver(
     fun parseDomAsTreeNodes(domRepresentation: Map<String, Any>): TreeNode {
         val attrs = domRepresentation["attributes"] as Map<String, Any>
 
-        val attributes = mutableMapOf(
-            "text" to attrs["text"] as String,
-            "bounds" to attrs["bounds"] as String,
-        )
-        if (attrs.containsKey("resource-id") && attrs["resource-id"] != null) {
-            attributes["resource-id"] = attrs["resource-id"] as String
+        val attributes = mutableMapOf<String, String>()
+        
+        // Dynamically copy all string attributes from JavaScript
+        attrs.forEach { (key, value) ->
+            when (value) {
+                is String -> attributes[key] = value
+                is Boolean -> attributes[key] = value.toString()
+                is Number -> attributes[key] = value.toString()
+            }
         }
-        if (attrs.containsKey("flutterId") && attrs["flutterId"] != null) {
-            attributes["flutterId"] = attrs["flutterId"] as String
-        }
-        if (attrs.containsKey("selected") && attrs["selected"] != null) {
-            attributes["selected"] = (attrs["selected"] as Boolean).toString()
-        }
-        if (attrs.containsKey("synthetic") && attrs["synthetic"] != null) {
-            attributes["synthetic"] = (attrs["synthetic"] as Boolean).toString()
-        }
-        if (attrs.containsKey("ignoreBoundsFiltering") && attrs["ignoreBoundsFiltering"] != null) {
-            attributes["ignoreBoundsFiltering"] = (attrs["ignoreBoundsFiltering"] as Boolean).toString()
-        }
+        
+        println("[DEBUG CdpWebDriver parseDomAsTreeNodes] Parsed attributes: ${attributes.keys}")
 
         val children = domRepresentation["children"] as List<Map<String, Any>>
 
