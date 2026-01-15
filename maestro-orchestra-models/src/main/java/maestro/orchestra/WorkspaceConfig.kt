@@ -7,7 +7,6 @@ data class WorkspaceConfig(
     val flows: StringList? = null,
     val includeTags: StringList? = null,
     val excludeTags: StringList? = null,
-    val local: Local? = null,
     val executionOrder: ExecutionOrder? = null,
     val baselineBranch: String? = null,
     val notifications: MaestroNotificationConfiguration? = null,
@@ -39,7 +38,8 @@ data class WorkspaceConfig(
 
     data class PlatformConfiguration(
         val android: AndroidConfiguration? = null,
-        val ios: IOSConfiguration? = null
+        val ios: IOSConfiguration? = null,
+        val web: WebConfiguration? = null
     ) {
         data class AndroidConfiguration(
             val disableAnimations: Boolean = false,
@@ -49,17 +49,16 @@ data class WorkspaceConfig(
             val disableAnimations: Boolean = false,
             val snapshotKeyHonorModalViews: Boolean? = null,
         )
+
+        data class WebConfiguration(
+            val selectorAliases: Map<String, String> = emptyMap()
+        )
     }
 
     @JsonAnySetter
     fun setOtherField(key: String, other: Any?) {
         // Do nothing
     }
-
-    @Deprecated("Use ExecutionOrder instead")
-    data class Local(
-        val deterministicOrder: Boolean? = null,
-    )
 
     data class ExecutionOrder(
         val continueOnFailure: Boolean? = true,

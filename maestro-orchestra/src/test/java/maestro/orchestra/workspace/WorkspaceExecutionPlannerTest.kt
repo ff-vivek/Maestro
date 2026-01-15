@@ -282,23 +282,7 @@ internal class WorkspaceExecutionPlannerTest {
         )
     }
 
-    @Test
-    internal fun `012 - Deterministic order for local tests`() {
-        // When
-        val plan = WorkspaceExecutionPlanner.plan(
-            input = paths("/workspaces/012_local_deterministic_order"),
-            includeTags = listOf(),
-            excludeTags = listOf(),
-            config = null,
-        )
-
-        // Then
-        assertThat(plan.flowsToRun).containsExactly(
-            path("/workspaces/012_local_deterministic_order/flowA.yaml"),
-            path("/workspaces/012_local_deterministic_order/flowB.yaml"),
-            path("/workspaces/012_local_deterministic_order/flowC.yaml"),
-        ).inOrder()
-    }
+    //012 - Deterministic order for local tests - removed
 
     @Test
     internal fun `013 - Execution order is respected`() {
@@ -371,6 +355,27 @@ internal class WorkspaceExecutionPlannerTest {
             PlatformConfiguration(
                 android = PlatformConfiguration.AndroidConfiguration(disableAnimations = true),
                 ios = PlatformConfiguration.IOSConfiguration(disableAnimations = true, snapshotKeyHonorModalViews = false)
+            )
+        )
+    }
+
+    @Test
+    internal fun `018 - Web platform config with selectorAliases is supported`() {
+        // when
+        val plan = WorkspaceExecutionPlanner.plan(
+            input = paths("/workspaces/016_web_platform_config"),
+            includeTags = listOf(),
+            excludeTags = listOf(),
+            config = null
+        )
+
+        val platformConfiguration = plan.workspaceConfig.platform
+        assertThat(platformConfiguration).isNotNull()
+        assertThat(platformConfiguration?.web).isNotNull()
+        assertThat(platformConfiguration?.web?.selectorAliases).isEqualTo(
+            mapOf(
+                "flt-semantics-identifier" to "flutter-id",
+                "data-test-id" to "test-id"
             )
         )
     }
