@@ -112,6 +112,20 @@ case "$( uname )" in                #(
   NONSTOP* )        nonstop=true ;;
 esac
 
+# Prefer Java 17 when available.
+if [ -n "$JAVA_HOME_17" ] ; then
+    JAVA_HOME=$JAVA_HOME_17
+elif [ -n "$JAVA17_HOME" ] ; then
+    JAVA_HOME=$JAVA17_HOME
+elif [ "$darwin" = true ] ; then
+    if command -v /usr/libexec/java_home >/dev/null 2>&1 ; then
+        JAVA_HOME_17=$(/usr/libexec/java_home -v 17 2>/dev/null) || true
+        if [ -n "$JAVA_HOME_17" ] ; then
+            JAVA_HOME=$JAVA_HOME_17
+        fi
+    fi
+fi
+
 CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar
 
 
