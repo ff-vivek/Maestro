@@ -581,23 +581,12 @@ class CdpWebDriver(
 
     override fun switchTab(index: Int) {
         val driver = ensureOpen()
-        val handles = driver.windowHandles.toList()
-
-        if (index < 0 || index >= handles.size) {
-            throw IllegalArgumentException("Tab index $index is out of bounds. Available tabs: ${handles.size}")
-        }
-
-        val targetHandle = handles[index]
-        LOGGER.info("Switching to tab at index $index (handle: $targetHandle)")
-        driver.switchTo().window(targetHandle)
-        lastSeenWindowHandles = driver.windowHandles
-
+        lastSeenWindowHandles = WebDriverUtils.switchTab(driver, index)
         webScreenRecorder?.onWindowChange()
     }
 
     override fun getTabCount(): Int {
-        val driver = ensureOpen()
-        return driver.windowHandles.size
+        return WebDriverUtils.getTabCount(ensureOpen())
     }
 
     override fun queryOnDeviceElements(query: OnDeviceElementQuery): List<TreeNode> {
