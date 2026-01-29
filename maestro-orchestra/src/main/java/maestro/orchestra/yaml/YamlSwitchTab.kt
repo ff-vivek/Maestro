@@ -11,10 +11,21 @@ data class YamlSwitchTab(
 
         @JvmStatic
         @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-        fun parse(index: Any): YamlSwitchTab {
-            return YamlSwitchTab(
-                index = index.toString(),
-            )
+        fun parse(value: Any): YamlSwitchTab {
+            return when (value) {
+                is Map<*, *> -> {
+                    YamlSwitchTab(
+                        index = value["index"]?.toString() ?: throw IllegalArgumentException("index is required for switchTab"),
+                        label = value["label"]?.toString(),
+                        optional = value["optional"]?.toString()?.toBoolean() ?: false,
+                    )
+                }
+                else -> {
+                    YamlSwitchTab(
+                        index = value.toString(),
+                    )
+                }
+            }
         }
     }
 }
