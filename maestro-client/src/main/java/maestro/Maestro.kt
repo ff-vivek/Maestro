@@ -606,6 +606,16 @@ class Maestro(
         driver.setAirplaneMode(enabled)
     }
 
+    fun switchTab(index: Int) {
+        LOGGER.info("Switching to browser tab at index $index")
+        driver.switchTab(index)
+        waitForAppToSettle()
+    }
+
+    fun getTabCount(): Int {
+        return driver.getTabCount()
+    }
+
     fun setAndroidChromeDevToolsEnabled(enabled: Boolean) {
         driver.setAndroidChromeDevToolsEnabled(enabled)
     }

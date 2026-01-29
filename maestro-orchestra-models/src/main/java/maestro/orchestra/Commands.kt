@@ -1126,6 +1126,22 @@ data class ToggleAirplaneModeCommand(
     }
 }
 
+data class SwitchTabCommand(
+    val index: String,
+    override val label: String? = null,
+    override val optional: Boolean = false,
+) : Command {
+    override val originalDescription: String
+        get() = "Switch to browser tab at index $index"
+
+    override fun evaluateScripts(jsEngine: JsEngine): SwitchTabCommand {
+        return copy(
+            index = index.evaluateScripts(jsEngine),
+            label = label?.evaluateScripts(jsEngine)
+        )
+    }
+}
+
 internal fun tapOnDescription(isLongPress: Boolean?, repeat: TapRepeat?): String {
     return if (isLongPress == true) "Long press"
     else if (repeat != null) {

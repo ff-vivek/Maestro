@@ -367,6 +367,7 @@ class Orchestra(
             is SetAirplaneModeCommand -> setAirplaneMode(command)
             is ToggleAirplaneModeCommand -> toggleAirplaneMode()
             is RetryCommand -> retryCommand(command, config)
+            is SwitchTabCommand -> switchTabCommand(command)
             else -> true
         }.also { mutating ->
             if (mutating) {
@@ -381,6 +382,13 @@ class Orchestra(
             AirplaneValue.Disable -> maestro.setAirplaneModeState(false)
         }
 
+        return true
+    }
+
+    private fun switchTabCommand(command: SwitchTabCommand): Boolean {
+        val index = command.index.toIntOrNull() 
+            ?: throw IllegalArgumentException("Invalid tab index: ${command.index}")
+        maestro.switchTab(index)
         return true
     }
 

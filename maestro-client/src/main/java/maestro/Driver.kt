@@ -103,6 +103,14 @@ interface Driver {
 
     fun setAirplaneMode(enabled: Boolean)
 
+    fun switchTab(index: Int) {
+        throw UnsupportedOperationException("switchTab is only supported on web platform")
+    }
+
+    fun getTabCount(): Int {
+        throw UnsupportedOperationException("getTabCount is only supported on web platform")
+    }
+
     fun setAndroidChromeDevToolsEnabled(enabled: Boolean) = Unit
 
     fun queryOnDeviceElements(query: OnDeviceElementQuery): List<TreeNode> {
