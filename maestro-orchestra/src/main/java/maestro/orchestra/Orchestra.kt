@@ -386,10 +386,32 @@ class Orchestra(
     }
 
     private fun switchTabCommand(command: SwitchTabCommand): Boolean {
-        val index = command.index.toIntOrNull() 
-            ?: throw IllegalArgumentException("Invalid tab index: ${command.index}")
-        maestro.switchTab(index)
-        return true
+        val index = command.index.toIntOrNull()
+            ?: return if (command.optional) {
+                logger.warn("Skipping optional switchTab: invalid index '${command.index}'")
+                false
+            } else {
+                throw IllegalArgumentException("Invalid tab index: ${command.index}")
+            }
+
+        return try {
+            maestro.switchTab(index)
+            true
+        } catch (e: UnsupportedOperationException) {
+            if (command.optional) {
+                logger.warn("Skipping optional switchTab: driver does not support tab switching", e)
+                false
+            } else {
+                throw e
+            }
+        } catch (e: IllegalArgumentException) {
+            if (command.optional) {
+                logger.warn("Skipping optional switchTab: ${e.message}")
+                false
+            } else {
+                throw e
+            }
+        }
     }
 
     private fun toggleAirplaneMode(): Boolean {
@@ -1541,4 +1563,3 @@ class Orchestra(
     val isPaused: Boolean
         get() = flowController.isPaused
 }
-

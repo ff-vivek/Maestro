@@ -4253,6 +4253,34 @@ class IntegrationTest {
         assert(File("137_shard_device_env_vars_test-device_shard1_idx0.png").exists())
     }
 
+    @Test
+    fun `Case 138 - Switch tab command`() {
+        // Given
+        val commands = readCommands("138_switch_tab")
+
+        val driver = driver {
+        }
+        driver.addInstalledApp("https://example.com")
+        driver.setTabCount(2)
+
+        // When
+        Maestro(driver).use {
+            runBlocking {
+                orchestra(it).runFlow(commands)
+            }
+        }
+
+        // Then
+        driver.assertEvents(
+            listOf(
+                Event.LaunchApp(appId = "https://example.com"),
+                Event.SwitchTab(index = 0),
+                Event.SwitchTab(index = 1),
+                Event.SwitchTab(index = 0),
+            )
+        )
+    }
+
     private fun orchestra(
         maestro: Maestro,
     ) = Orchestra(

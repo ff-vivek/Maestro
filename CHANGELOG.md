@@ -6,6 +6,7 @@
 
 - Add `setPermissions` command, for setting app permissions outside of `launchApp`
 - Add `setClipboard` command, for setting Maestro's internal clipboard without copying from an element
+- Add `switchTab` command, for jumping between browser tabs during web flows
 - Add `--platform` and `--device` to `maestro test` command
 - Add custom JUnit properties to reporting
 - Add support for --no-reinstall-driver option to `test` and `hierarchy` commands

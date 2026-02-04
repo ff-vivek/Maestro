@@ -56,6 +56,23 @@ appId: com.android.contacts
 - tapOn: "Save"
 ```
 
+### Web Flows & Tab Control
+
+Maestro also drives desktop browsers. Use the new `switchTab` command to hop between tabs in the middle of a flow (for example, when multi-factor logins open pop-ups):
+
+```
+# flow_web_tabs.yaml
+
+url: https://example.com
+---
+- launchApp
+- switchTab: 1
+- switchTab:
+    index: 0
+    optional: true
+    label: "Back to main tab"
+```
+
 ---
 ## Getting Started
 
@@ -130,5 +147,4 @@ Pricing for Maestro Cloud is completely transparent and can be found on the [pri
 ```
   Built with ❤️ by Maestro.dev
 ```
-
 
