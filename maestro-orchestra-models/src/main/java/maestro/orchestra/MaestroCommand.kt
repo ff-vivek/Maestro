@@ -42,6 +42,7 @@ data class MaestroCommand(
     val inputTextCommand: InputTextCommand? = null,
     val inputRandomTextCommand: InputRandomCommand? = null,
     val launchAppCommand: LaunchAppCommand? = null,
+    val setPermissionsCommand: SetPermissionsCommand? = null,
     val applyConfigurationCommand: ApplyConfigurationCommand? = null,
     val openLinkCommand: OpenLinkCommand? = null,
     val pressKeyCommand: PressKeyCommand? = null,
@@ -57,6 +58,7 @@ data class MaestroCommand(
     var setOrientationCommand: SetOrientationCommand? = null,
     val repeatCommand: RepeatCommand? = null,
     val copyTextCommand: CopyTextFromCommand? = null,
+    val setClipboardCommand: SetClipboardCommand? = null,
     val pasteTextCommand: PasteTextCommand? = null,
     val defineVariablesCommand: DefineVariablesCommand? = null,
     val runScriptCommand: RunScriptCommand? = null,
@@ -70,6 +72,7 @@ data class MaestroCommand(
     val setAirplaneModeCommand: SetAirplaneModeCommand? = null,
     val toggleAirplaneModeCommand: ToggleAirplaneModeCommand? = null,
     val retryCommand: RetryCommand? = null,
+    val switchTabCommand: SwitchTabCommand? = null,
 ) {
 
     constructor(command: Command) : this(
@@ -87,6 +90,7 @@ data class MaestroCommand(
         inputTextCommand = command as? InputTextCommand,
         inputRandomTextCommand = command as? InputRandomCommand,
         launchAppCommand = command as? LaunchAppCommand,
+        setPermissionsCommand = command as? SetPermissionsCommand,
         applyConfigurationCommand = command as? ApplyConfigurationCommand,
         openLinkCommand = command as? OpenLinkCommand,
         pressKeyCommand = command as? PressKeyCommand,
@@ -102,6 +106,7 @@ data class MaestroCommand(
         setOrientationCommand = command as? SetOrientationCommand,
         repeatCommand = command as? RepeatCommand,
         copyTextCommand = command as? CopyTextFromCommand,
+        setClipboardCommand = command as? SetClipboardCommand,
         pasteTextCommand = command as? PasteTextCommand,
         defineVariablesCommand = command as? DefineVariablesCommand,
         runScriptCommand = command as? RunScriptCommand,
@@ -114,7 +119,8 @@ data class MaestroCommand(
         addMediaCommand = command as? AddMediaCommand,
         setAirplaneModeCommand = command as? SetAirplaneModeCommand,
         toggleAirplaneModeCommand = command as? ToggleAirplaneModeCommand,
-        retryCommand = command as? RetryCommand
+        retryCommand = command as? RetryCommand,
+        switchTabCommand = command as? SwitchTabCommand
     )
 
     fun asCommand(): Command? = when {
@@ -132,6 +138,7 @@ data class MaestroCommand(
         inputTextCommand != null -> inputTextCommand
         inputRandomTextCommand != null -> inputRandomTextCommand
         launchAppCommand != null -> launchAppCommand
+        setPermissionsCommand != null -> setPermissionsCommand
         applyConfigurationCommand != null -> applyConfigurationCommand
         openLinkCommand != null -> openLinkCommand
         pressKeyCommand != null -> pressKeyCommand
@@ -147,6 +154,7 @@ data class MaestroCommand(
         setOrientationCommand != null -> setOrientationCommand
         repeatCommand != null -> repeatCommand
         copyTextCommand != null -> copyTextCommand
+        setClipboardCommand != null -> setClipboardCommand
         pasteTextCommand != null -> pasteTextCommand
         defineVariablesCommand != null -> defineVariablesCommand
         runScriptCommand != null -> runScriptCommand
@@ -160,6 +168,7 @@ data class MaestroCommand(
         setAirplaneModeCommand != null -> setAirplaneModeCommand
         toggleAirplaneModeCommand != null -> toggleAirplaneModeCommand
         retryCommand != null -> retryCommand
+        switchTabCommand != null -> switchTabCommand
         else -> null
     }
 

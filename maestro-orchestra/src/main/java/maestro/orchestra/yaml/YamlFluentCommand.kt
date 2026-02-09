@@ -35,6 +35,7 @@ import maestro.orchestra.ClearKeychainCommand
 import maestro.orchestra.ClearStateCommand
 import maestro.orchestra.Condition
 import maestro.orchestra.CopyTextFromCommand
+import maestro.orchestra.SetClipboardCommand
 import maestro.orchestra.ElementSelector
 import maestro.orchestra.ElementTrait
 import maestro.orchestra.EraseTextCommand
@@ -60,6 +61,7 @@ import maestro.orchestra.ScrollUntilVisibleCommand
 import maestro.orchestra.SetAirplaneModeCommand
 import maestro.orchestra.SetLocationCommand
 import maestro.orchestra.SetOrientationCommand
+import maestro.orchestra.SetPermissionsCommand
 import maestro.orchestra.StartRecordingCommand
 import maestro.orchestra.StopAppCommand
 import maestro.orchestra.StopRecordingCommand
@@ -70,6 +72,7 @@ import maestro.orchestra.TapOnPointV2Command
 import maestro.orchestra.ToggleAirplaneModeCommand
 import maestro.orchestra.TravelCommand
 import maestro.orchestra.WaitForAnimationToEndCommand
+import maestro.orchestra.SwitchTabCommand
 import maestro.orchestra.error.InvalidFlowFile
 import maestro.orchestra.error.MediaFileNotFound
 import maestro.orchestra.error.SyntaxError
@@ -109,6 +112,7 @@ data class YamlFluentCommand(
     val inputRandomCountryName: YamlInputRandomCountryName? = null,
     val inputRandomColorName: YamlInputRandomColorName? = null,
     val launchApp: YamlLaunchApp? = null,
+    val setPermissions: YamlSetPermissions? = null,
     val swipe: YamlSwipe? = null,
     val openLink: YamlOpenLink? = null,
     val openBrowser: String? = null,
@@ -125,6 +129,7 @@ data class YamlFluentCommand(
     val setOrientation: YamlSetOrientation? = null,
     val repeat: YamlRepeatCommand? = null,
     val copyTextFrom: YamlElementSelectorUnion? = null,
+    val setClipboard: YamlSetClipboard? = null,
     val runScript: YamlRunScript? = null,
     val waitForAnimationToEnd: YamlWaitForAnimationToEndCommand? = null,
     val evalScript: YamlEvalScript? = null,
@@ -136,6 +141,7 @@ data class YamlFluentCommand(
     val setAirplaneMode: YamlSetAirplaneMode? = null,
     val toggleAirplaneMode: YamlToggleAirplaneMode? = null,
     val retry: YamlRetryCommand? = null,
+    val switchTab: YamlSwitchTab? = null,
     @JsonIgnore val _location: JsonLocation,
 ) {
 
@@ -151,6 +157,7 @@ data class YamlFluentCommand(
     private fun _toCommands(flowPath: Path, appId: String): List<MaestroCommand> {
         return when {
             launchApp != null -> listOf(launchApp(launchApp, appId))
+            setPermissions != null -> listOf(setPermissions(command = setPermissions, appId))
             tapOn != null -> listOf(tapCommand(tapOn))
             longPressOn != null -> listOf(tapCommand(longPressOn, longPress = true))
             assertVisible != null -> listOf(
@@ -369,19 +376,30 @@ data class YamlFluentCommand(
             )
 
             copyTextFrom != null -> listOf(copyTextFromCommand(copyTextFrom))
-            runScript != null -> listOf(
+            setClipboard != null -> listOf(
                 MaestroCommand(
-                    RunScriptCommand(
-                        script = resolvePath(flowPath, runScript.file)
-                            .readText(),
-                        env = runScript.env,
-                        sourceDescription = runScript.file,
-                        condition = runScript.`when`?.toCondition(),
-                        label = runScript.label,
-                        optional = runScript.optional,
+                    SetClipboardCommand(
+                        text = setClipboard.text,
+                        label = setClipboard.label,
+                        optional = setClipboard.optional
                     )
                 )
             )
+            runScript != null -> {
+                val scriptPath = resolvePath(flowPath, runScript.file)
+                listOf(
+                    MaestroCommand(
+                        RunScriptCommand(
+                            script = scriptPath.readText(),
+                            env = runScript.env,
+                            sourceDescription = scriptPath.toString(),
+                            condition = runScript.`when`?.toCondition(),
+                            label = runScript.label,
+                            optional = runScript.optional,
+                        )
+                    )
+                )
+            }
 
             waitForAnimationToEnd != null -> listOf(
                 MaestroCommand(
@@ -447,6 +465,16 @@ data class YamlFluentCommand(
                     ToggleAirplaneModeCommand(
                         toggleAirplaneMode.label,
                         toggleAirplaneMode.optional
+                    )
+                )
+            )
+
+            switchTab != null -> listOf(
+                MaestroCommand(
+                    SwitchTabCommand(
+                        index = switchTab.index,
+                        label = switchTab.label,
+                        optional = switchTab.optional
                     )
                 )
             )
@@ -700,6 +728,17 @@ data class YamlFluentCommand(
                 stopApp = command.stopApp,
                 permissions = command.permissions,
                 launchArguments = command.arguments,
+                label = command.label,
+                optional = command.optional,
+            )
+        )
+    }
+
+    private fun setPermissions(command: YamlSetPermissions, appId: String): MaestroCommand {
+        return MaestroCommand(
+            SetPermissionsCommand(
+                appId = command.appId ?: appId,
+                permissions = command.permissions,
                 label = command.label,
                 optional = command.optional,
             )

@@ -19,6 +19,7 @@
 
 package maestro.orchestra
 
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.isActive
 import maestro.Driver
 import maestro.ElementFilter
@@ -52,6 +53,7 @@ import maestro.utils.NoopInsights
 import maestro.utils.StringUtils.toRegexSafe
 import okhttp3.OkHttpClient
 import okio.Buffer
+import okio.BufferedSink
 import okio.Sink
 import okio.buffer
 import okio.sink
@@ -68,11 +70,6 @@ import kotlin.coroutines.coroutineContext
 //    that is streamed to disk.
 //  Idea:
 //    Orchestra should expose a callback like "onResourceRequested: (Command, CommandOutputType)"
-sealed class CommandOutput {
-    data class Screenshot(val screenshot: Buffer) : CommandOutput()
-    data class ScreenRecording(val screenRecording: Buffer) : CommandOutput()
-    data class AIDefects(val defects: List<Defect>, val screenshot: Buffer) : CommandOutput()
-}
 
 interface FlowController {
     suspend fun waitIfPaused()
@@ -86,7 +83,7 @@ class DefaultFlowController : FlowController {
 
     override suspend fun waitIfPaused() {
         while (_isPaused) {
-            if (!coroutineContext.isActive) {
+            if (!currentCoroutineContext().isActive) {
                 break
             }
             Thread.sleep(500)
@@ -205,7 +202,7 @@ class Orchestra(
             initJsEngine(config)
         }
 
-        if (!coroutineContext.isActive) {
+        if (!currentCoroutineContext().isActive) {
             logger.info("Flow cancelled, skipping initAndroidChromeDevTools...")
         } else {
             initAndroidChromeDevTools(config)
@@ -213,14 +210,21 @@ class Orchestra(
 
         commands
             .forEachIndexed { index, command ->
-                if (!coroutineContext.isActive) {
-                    logger.info("[Command execution] Command skipped due to cancellation: ${command}")
+                if (!currentCoroutineContext().isActive) {
+                    logger.info("[Command execution] Command skipped due to cancellation: $command")
                     onCommandSkipped(index, command)
                     return@forEachIndexed
                 }
 
                 // Check for pause before executing each command
                 flowController.waitIfPaused()
+
+                val evaluatedCommand = command.evaluateScripts(jsEngine)
+                val metadata = getMetadata(command)
+                    .copy(
+                        evaluatedCommand = evaluatedCommand,
+                    )
+                updateMetadata(command, metadata)
 
                 onCommandStart(index, command)
 
@@ -232,13 +236,6 @@ class Orchestra(
                     )
                     logger.info("JsConsole: $msg")
                 }
-
-                val evaluatedCommand = command.evaluateScripts(jsEngine)
-                val metadata = getMetadata(command)
-                    .copy(
-                        evaluatedCommand = evaluatedCommand,
-                    )
-                updateMetadata(command, metadata)
 
                 val callback: (Insight) -> Unit = { insight ->
                     updateMetadata(
@@ -311,7 +308,7 @@ class Orchestra(
     private suspend fun executeCommand(maestroCommand: MaestroCommand, config: MaestroConfig?): Boolean {
         val command = maestroCommand.asCommand()
 
-        if (!coroutineContext.isActive) {
+        if (!currentCoroutineContext().isActive) {
             throw CommandSkipped
         }
 
@@ -333,6 +330,7 @@ class Orchestra(
             is HideKeyboardCommand -> hideKeyboardCommand()
             is ScrollCommand -> scrollVerticalCommand()
             is CopyTextFromCommand -> copyTextFromCommand(command)
+            is SetClipboardCommand -> setClipboardCommand(command)
             is ScrollUntilVisibleCommand -> scrollUntilVisible(command)
             is PasteTextCommand -> pasteText()
             is SwipeCommand -> swipeCommand(command)
@@ -344,6 +342,7 @@ class Orchestra(
             is InputTextCommand -> inputTextCommand(command)
             is InputRandomCommand -> inputTextRandomCommand(command)
             is LaunchAppCommand -> launchAppCommand(command)
+            is SetPermissionsCommand -> setPermissionsCommand(command)
             is OpenLinkCommand -> openLinkCommand(command, config)
             is PressKeyCommand -> pressKeyCommand(command)
             is EraseTextCommand -> eraseTextCommand(command)
@@ -368,6 +367,7 @@ class Orchestra(
             is SetAirplaneModeCommand -> setAirplaneMode(command)
             is ToggleAirplaneModeCommand -> toggleAirplaneMode()
             is RetryCommand -> retryCommand(command, config)
+            is SwitchTabCommand -> switchTabCommand(command)
             else -> true
         }.also { mutating ->
             if (mutating) {
@@ -383,6 +383,35 @@ class Orchestra(
         }
 
         return true
+    }
+
+    private fun switchTabCommand(command: SwitchTabCommand): Boolean {
+        val index = command.index.toIntOrNull()
+            ?: return if (command.optional) {
+                logger.warn("Skipping optional switchTab: invalid index '${command.index}'")
+                false
+            } else {
+                throw IllegalArgumentException("Invalid tab index: ${command.index}")
+            }
+
+        return try {
+            maestro.switchTab(index)
+            true
+        } catch (e: UnsupportedOperationException) {
+            if (command.optional) {
+                logger.warn("Skipping optional switchTab: driver does not support tab switching", e)
+                false
+            } else {
+                throw e
+            }
+        } catch (e: IllegalArgumentException) {
+            if (command.optional) {
+                logger.warn("Skipping optional switchTab: ${e.message}")
+                false
+            } else {
+                throw e
+            }
+        }
     }
 
     private fun toggleAirplaneMode(): Boolean {
@@ -614,7 +643,7 @@ class Orchestra(
 
                 logger.info("Scrolling try count: $retryCenterCount, DeviceWidth: ${deviceInfo.widthGrid}, DeviceWidth: ${deviceInfo.heightGrid}")
                 logger.info("Element bounds: ${element.bounds}")
-                logger.info("Visibility Percent: $retryCenterCount")
+                logger.info("Visibility Percent: $visibility")
                 logger.info("Command centerElement: $command.centerElement")
                 logger.info("visibilityPercentageNormalized: ${command.visibilityPercentageNormalized}")
 
@@ -700,7 +729,7 @@ class Orchestra(
                 ?.let { evaluateCondition(it, commandOptional = command.optional) } != false
         }
 
-        while (checkCondition() && counter < maxRuns) {
+        while (checkCondition() && counter < maxRuns && currentCoroutineContext().isActive) {
             if (counter > 0) {
                 command.commands.forEach { resetCommand(it) }
             }
@@ -857,14 +886,14 @@ class Orchestra(
         return try {
             commands
                 .mapIndexed { index, command ->
-                    onCommandStart(index, command)
-
                     val evaluatedCommand = command.evaluateScripts(jsEngine)
                     val metadata = getMetadata(command)
                         .copy(
                             evaluatedCommand = evaluatedCommand,
                         )
                     updateMetadata(command, metadata)
+
+                    onCommandStart(index, command)
 
                     return@mapIndexed try {
                         try {
@@ -942,21 +971,15 @@ class Orchestra(
 
     private fun takeScreenshotCommand(command: TakeScreenshotCommand): Boolean {
         val pathStr = command.path + ".png"
-        val file = screenshotsDir
-            ?.let { it.resolve(pathStr).toFile() }
-            ?: File(pathStr)
-
-        maestro.takeScreenshot(file, false)
-
+        val fileSink = getFileSink(screenshotsDir, pathStr)
+        maestro.takeScreenshot(fileSink, false)
         return false
     }
 
     private fun startRecordingCommand(command: StartRecordingCommand): Boolean {
         val pathStr = command.path + ".mp4"
-        val file = screenshotsDir
-            ?.let { it.resolve(pathStr).toFile() }
-            ?: File(pathStr)
-        screenRecording = maestro.startScreenRecording(file.sink().buffer())
+        val fileSink = getFileSink(screenshotsDir, pathStr)
+        screenRecording = maestro.startScreenRecording(fileSink)
         return false
     }
 
@@ -993,14 +1016,18 @@ class Orchestra(
             if (command.clearState == true) {
                 maestro.clearAppState(command.appId)
             }
+        } catch (e: Exception) {
+            logger.error("Failed to clear state", e)
+            throw MaestroException.UnableToClearState("Unable to clear state for app ${command.appId}: ${e.message}", e)
+        }
 
+        try {
             // For testing convenience, default to allow all on app launch
             val permissions = command.permissions ?: mapOf("all" to "allow")
             maestro.setPermissions(command.appId, permissions)
-
         } catch (e: Exception) {
-            logger.error("Failed to clear state", e)
-            throw MaestroException.UnableToClearState("Unable to clear state for app ${command.appId}", cause = e)
+            logger.error("Failed to set permissions", e)
+            throw MaestroException.UnableToSetPermissions("Unable to set permissions for app ${command.appId}: ${e.message}", e)
         }
 
         try {
@@ -1012,6 +1039,16 @@ class Orchestra(
         } catch (e: Exception) {
             logger.error("Failed to launch app", e)
             throw MaestroException.UnableToLaunchApp("Unable to launch app ${command.appId}", cause = e)
+        }
+
+        return true
+    }
+
+    private fun setPermissionsCommand(command: SetPermissionsCommand): Boolean {
+        try {
+            maestro.setPermissions(command.appId, command.permissions)
+        } catch (e: Exception) {
+            throw MaestroException.UnableToSetPermissions("Unable to set permissions for app ${command.appId}: ${e.message}", e)
         }
 
         return true
@@ -1439,6 +1476,13 @@ class Orchestra(
         return true
     }
 
+    private fun setClipboardCommand(command: SetClipboardCommand): Boolean {
+        copiedText = command.text
+        jsEngine.setCopiedText(copiedText)
+
+        return true
+    }
+
     private fun resolveText(attributes: MutableMap<String, String>): String? {
         return if (!attributes["text"].isNullOrEmpty()) {
             attributes["text"]
@@ -1452,6 +1496,22 @@ class Orchestra(
     private fun pasteText(): Boolean {
         copiedText?.let { maestro.inputText(it) }
         return true
+    }
+
+    private fun getFileSink(parentPath: Path?, filePathStr: String): BufferedSink {
+        // Work out relative v absolute input
+        val resolvedFile = parentPath?.resolve(filePathStr)?.toFile() ?: File(filePathStr)
+        val absoluteFile = resolvedFile.absoluteFile
+
+        if(absoluteFile.parentFile.exists() || absoluteFile.parentFile.mkdirs()) {
+            return resolvedFile
+                .sink()
+                .buffer()
+        } else {
+            throw MaestroException.DestinationIsNotWritable(
+                "Unable to create directory for file: ${absoluteFile.parentFile.absolutePath}"
+            )
+        }
     }
 
     private suspend fun executeDefineVariablesCommands(commands: List<MaestroCommand>, config: MaestroConfig?) {
@@ -1503,4 +1563,3 @@ class Orchestra(
     val isPaused: Boolean
         get() = flowController.isPaused
 }
-

@@ -267,6 +267,23 @@ data class CopyTextFromCommand(
     }
 }
 
+data class SetClipboardCommand(
+    val text: String,
+    override val label: String? = null,
+    override val optional: Boolean = false,
+) : Command {
+
+    override val originalDescription: String
+        get() = "Set Maestro clipboard to $text"
+
+    override fun evaluateScripts(jsEngine: JsEngine): SetClipboardCommand {
+        return copy(
+            text = text.evaluateScripts(jsEngine),
+            label = label?.evaluateScripts(jsEngine)
+        )
+    }
+}
+
 data class PasteTextCommand(
     override val label: String? = null,
     override val optional: Boolean = false,
@@ -515,6 +532,24 @@ data class LaunchAppCommand(
                 val value = it.value
                 it.key.evaluateScripts(jsEngine) to if (value is String) value.evaluateScripts(jsEngine) else it.value
             },
+            label = label?.evaluateScripts(jsEngine)
+        )
+    }
+}
+
+data class SetPermissionsCommand(
+    val appId: String,
+    var permissions: Map<String, String>,
+    override val label: String? = null,
+    override val optional: Boolean = false,
+) : Command {
+
+    override val originalDescription: String
+        get() = "Set permissions"
+
+    override fun evaluateScripts(jsEngine: JsEngine): SetPermissionsCommand {
+        return copy(
+            appId = appId.evaluateScripts(jsEngine),
             label = label?.evaluateScripts(jsEngine)
         )
     }
@@ -1088,6 +1123,22 @@ data class ToggleAirplaneModeCommand(
 
     override fun evaluateScripts(jsEngine: JsEngine): Command {
         return this
+    }
+}
+
+data class SwitchTabCommand(
+    val index: String,
+    override val label: String? = null,
+    override val optional: Boolean = false,
+) : Command {
+    override val originalDescription: String
+        get() = "Switch to browser tab at index $index"
+
+    override fun evaluateScripts(jsEngine: JsEngine): SwitchTabCommand {
+        return copy(
+            index = index.evaluateScripts(jsEngine),
+            label = label?.evaluateScripts(jsEngine)
+        )
     }
 }
 

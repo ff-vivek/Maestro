@@ -1,0 +1,16 @@
+url: https://example.com
+---
+- launchApp
+
+# Simple form: switch to tab at index 0 (first tab)
+- switchTab: 0
+
+# Extended form with optional label
+- switchTab:
+    index: 1
+    label: "Switch to second tab"
+
+# Switch back to first tab
+- switchTab:
+    index: 0
+    optional: true

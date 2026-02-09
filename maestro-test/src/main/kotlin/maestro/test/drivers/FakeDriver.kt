@@ -46,6 +46,8 @@ class FakeDriver : Driver {
     private var state: State = State.NOT_INITIALIZED
     private var layout: FakeLayoutElement = FakeLayoutElement()
     private var installedApps = mutableSetOf<String>()
+    private var tabCount: Int = 1
+    private var currentTabIndex: Int = 0
 
     private val events = mutableListOf<Event>()
 
@@ -323,6 +325,14 @@ class FakeDriver : Driver {
         this.layout = layout
     }
 
+    fun setTabCount(count: Int) {
+        require(count > 0) { "Tab count must be at least 1" }
+        tabCount = count
+        if (currentTabIndex >= tabCount) {
+            currentTabIndex = tabCount - 1
+        }
+    }
+
     fun addInstalledApp(appId: String) {
         installedApps.add(appId)
     }
@@ -383,9 +393,7 @@ class FakeDriver : Driver {
     }
 
     override fun capabilities(): List<Capability> {
-        return listOf(
-            Capability.FAST_HIERARCHY
-        )
+        return emptyList()
     }
 
     override fun setPermissions(appId: String, permissions: Map<String, String>) {
@@ -406,6 +414,22 @@ class FakeDriver : Driver {
 
     override fun setAirplaneMode(enabled: Boolean) {
         this.airplaneMode = enabled
+    }
+
+    override fun switchTab(index: Int) {
+        ensureOpen()
+
+        if (index < 0 || index >= tabCount) {
+            throw IllegalArgumentException("Tab index $index is out of bounds. Available tabs: $tabCount")
+        }
+
+        currentTabIndex = index
+        events += Event.SwitchTab(index)
+    }
+
+    override fun getTabCount(): Int {
+        ensureOpen()
+        return tabCount
     }
 
     override fun queryOnDeviceElements(query: OnDeviceElementQuery): List<TreeNode> {
@@ -527,6 +551,10 @@ class FakeDriver : Driver {
         object StartRecording : Event()
 
         object StopRecording : Event()
+
+        data class SwitchTab(
+            val index: Int
+        ) : Event()
     }
 
     interface UserInteraction
