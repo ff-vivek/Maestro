@@ -1,0 +1,40 @@
+name: Build Windows Executable
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'cli-*'
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+
+      - name: Build Windows app image
+        run: ./gradlew :maestro-cli:jpackageWindows --no-daemon
+
+      - name: Zip output directory
+        run: Compress-Archive -Path maestro-cli/build/jpackage/maestro/* -DestinationPath maestro-win.zip
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: maestro-win
+          path: maestro-win.zip
+
+      - name: Attach to release
+        if: startsWith(github.ref, 'refs/tags/cli-')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload ${{ github.ref_name }} maestro-win.zip --clobber

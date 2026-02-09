@@ -339,6 +339,34 @@ jreleaser {
     }
 }
 
+tasks.register<Exec>("jpackageWindows") {
+    dependsOn("installDist")
+    group = "distribution"
+    description = "Creates a self-contained Windows app image with embedded JRE using jpackage"
+
+    val installDir = layout.buildDirectory.dir("install/maestro")
+    val outputDir = layout.buildDirectory.dir("jpackage")
+    val mainJar = "maestro-cli-${CLI_VERSION}.jar"
+
+    doFirst {
+        // Clean output directory to avoid jpackage errors on re-runs
+        delete(outputDir)
+    }
+
+    commandLine(
+        "jpackage",
+        "--type", "app-image",
+        "--input", installDir.get().dir("lib").asFile.absolutePath,
+        "--main-jar", mainJar,
+        "--main-class", "maestro.cli.AppKt",
+        "--dest", outputDir.get().asFile.absolutePath,
+        "--name", "maestro",
+        "--app-version", CLI_VERSION,
+        "--win-console",
+        "--java-options", "-Xmx4g"
+    )
+}
+
 tasks.register<Test>("integrationTest") {
     group = "verification"
     useJUnitPlatform {
