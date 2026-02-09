@@ -1,0 +1,67 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Maestro Workspace Configuration
+# ═══════════════════════════════════════════════════════════════════════════════
+# Place this file in your maestro/ directory root
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Test Output Configuration
+# ─────────────────────────────────────────────────────────────────────────────
+# Directory where screenshots, recordings, and reports are saved
+testOutputDir: ../test_results
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Platform Configuration
+# ─────────────────────────────────────────────────────────────────────────────
+platform:
+  web:
+    # Custom selector aliases for Flutter Web
+    # Maps HTML attributes to friendly YAML selector names
+    selectorAliases:
+      # Flutter semantics identifier → flutterId
+      # Usage: - tapOn: { flutterId: submit_button }
+      flt-semantics-identifier: flutterId
+      
+      # ARIA label → ariaLabel
+      # Usage: - tapOn: { ariaLabel: "Close dialog" }
+      aria-label: ariaLabel
+      
+      # Custom test ID attributes (if used in your app)
+      # Usage: - tapOn: { testId: login_form }
+      data-testid: testId
+      
+      # Cypress compatibility (if migrating from Cypress)
+      # Usage: - tapOn: { cypressId: submit_btn }
+      data-cy: cypressId
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Global Environment Variables
+# ─────────────────────────────────────────────────────────────────────────────
+# These can be overridden in individual flow files or via CLI
+env:
+  # Application URLs
+  BASE_URL: http://localhost:4446
+  
+  # Default timeouts (in milliseconds)
+  DEFAULT_TIMEOUT: 5000
+  ANIMATION_TIMEOUT: 2000
+  
+  # Test user credentials (for local development only)
+  # In CI, override with: maestro test -e TEST_USER=xxx
+  TEST_USER: testuser@example.com
+  
+  # Feature flags for conditional tests
+  ENABLE_EXPERIMENTAL_TESTS: false
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Flow Hooks (Optional)
+# ─────────────────────────────────────────────────────────────────────────────
+# Commands that run before/after every flow in this workspace
+
+# onFlowStart:
+#   - runScript: scripts/setup_test_data.js
+#   - takeScreenshot: flow_start
+
+# onFlowComplete:
+#   - takeScreenshot: flow_end
+#   - runScript: scripts/cleanup.js

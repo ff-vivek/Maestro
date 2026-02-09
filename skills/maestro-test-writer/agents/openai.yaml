@@ -1,0 +1,4 @@
+interface:
+  display_name: "Maestro Test Writer"
+  short_description: "Write resilient Maestro YAML flows"
+  default_prompt: "Author Maestro YAML flows, workspace configs, and supporting scripts for Maestro test automation."

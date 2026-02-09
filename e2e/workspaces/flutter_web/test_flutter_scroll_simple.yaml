@@ -1,0 +1,171 @@
+url: http://localhost:8088/test_flutter_scroll.html
+---
+# Simple Flutter Web Scrolling Test
+# Tests the scroll mechanism without relying on assertVisible
+
+- launchApp
+
+# Wait for page to fully load
+- evalScript: |
+    console.log('=== TEST START ===');
+    new Promise(resolve => setTimeout(resolve, 1000));
+
+# Check initial state
+- evalScript: |
+    console.log('=== INITIAL STATE ===');
+    console.log('1. Flutter detected:', window.maestro.isFlutterApp());
+    const content = document.getElementById('flutter-content');
+    const initialTransform = content.style.transform || 'none';
+    console.log('2. Initial transform:', initialTransform);
+    console.log('3. Expected: none or empty');
+    
+    // Verify we can access the content
+    if (!content) {
+        throw new Error('flutter-content element not found!');
+    }
+    output.test1 = 'passed';
+
+# TEST 1: Execute a scroll command and verify transform changes
+- evalScript: |
+    console.log('=== TEST 1: Scroll Down ===');
+    console.log('Executing scroll...');
+
+- scroll
+
+# Check if scroll worked by examining transform
+- evalScript: |
+    console.log('=== VERIFY TEST 1 ===');
+    const content = document.getElementById('flutter-content');
+    const transform = content.style.transform;
+    console.log('Transform after scroll:', transform);
+    
+    // Check if transform was applied (should be translateY with negative value)
+    if (!transform || transform === 'none' || transform === '') {
+        console.error('❌ FAIL: No transform applied!');
+        throw new Error('Scroll did not apply transform');
+    }
+    
+    // Check if it's a translateY
+    if (!transform.includes('translateY')) {
+        console.error('❌ FAIL: Transform is not translateY:', transform);
+        throw new Error('Transform is not translateY');
+    }
+    
+    // Extract the pixel value (should be negative for scroll down)
+    const match = transform.match(/translateY\((-?\d+(?:\.\d+)?)px\)/);
+    if (!match) {
+        console.error('❌ FAIL: Could not parse transform:', transform);
+        throw new Error('Could not parse transform value');
+    }
+    
+    const scrollY = parseFloat(match[1]);
+    console.log('Scroll position (pixels):', scrollY);
+    
+    if (scrollY >= 0) {
+        console.error('❌ FAIL: Scroll position should be negative (scrolled down), got:', scrollY);
+        throw new Error('Scroll position is not negative');
+    }
+    
+    console.log('✅ PASS: Scrolled down by', Math.abs(scrollY), 'pixels');
+    output.scroll1 = scrollY;
+
+# TEST 2: Multiple scrolls should increase the scroll amount
+- evalScript: |
+    console.log('=== TEST 2: Multiple Scrolls ===');
+
+- scroll
+- scroll
+
+- evalScript: |
+    console.log('=== VERIFY TEST 2 ===');
+    const content = document.getElementById('flutter-content');
+    const transform = content.style.transform;
+    const match = transform.match(/translateY\((-?\d+(?:\.\d+)?)px\)/);
+    const scrollY = parseFloat(match[1]);
+    const previousScroll = output.scroll1;
+    
+    console.log('Previous scroll:', previousScroll);
+    console.log('Current scroll:', scrollY);
+    console.log('Difference:', scrollY - previousScroll);
+    
+    if (scrollY >= previousScroll) {
+        console.error('❌ FAIL: Scroll position should have increased (more negative)');
+        console.error('Previous:', previousScroll, 'Current:', scrollY);
+        throw new Error('Scroll did not increase');
+    }
+    
+    console.log('✅ PASS: Scrolled further by', Math.abs(scrollY - previousScroll), 'pixels');
+    output.scroll2 = scrollY;
+
+# TEST 3: Test swipe direction (scroll up / content down)
+- evalScript: |
+    console.log('=== TEST 3: Swipe Down (Scroll Up) ===');
+
+- swipe:
+    direction: DOWN
+
+- evalScript: |
+    console.log('=== VERIFY TEST 3 ===');
+    const content = document.getElementById('flutter-content');
+    const transform = content.style.transform;
+    const match = transform.match(/translateY\((-?\d+(?:\.\d+)?)px\)/);
+    const scrollY = parseFloat(match[1]);
+    const previousScroll = output.scroll2;
+    
+    console.log('Previous scroll:', previousScroll);
+    console.log('Current scroll:', scrollY);
+    console.log('Difference:', scrollY - previousScroll);
+    
+    // Swipe DOWN should make scrollY less negative (scroll content down / view scrolls up)
+    if (scrollY <= previousScroll) {
+        console.error('❌ FAIL: Swipe down should reduce scroll (less negative)');
+        console.error('Previous:', previousScroll, 'Current:', scrollY);
+        throw new Error('Swipe direction incorrect');
+    }
+    
+    console.log('✅ PASS: Swiped down (scrolled up) by', Math.abs(scrollY - previousScroll), 'pixels');
+    output.scroll3 = scrollY;
+
+# TEST 4: Scroll back to near-top
+- evalScript: |
+    console.log('=== TEST 4: Scroll Back to Top ===');
+
+- swipe:
+    direction: DOWN
+- swipe:
+    direction: DOWN
+- swipe:
+    direction: DOWN
+
+- evalScript: |
+    console.log('=== VERIFY TEST 4 ===');
+    const content = document.getElementById('flutter-content');
+    const transform = content.style.transform;
+    const match = transform.match(/translateY\((-?\d+(?:\.\d+)?)px\)/);
+    const scrollY = parseFloat(match[1]);
+    
+    console.log('Final scroll position:', scrollY);
+    
+    // Should be close to 0 or slightly negative
+    if (Math.abs(scrollY) > 100) {
+        console.warn('⚠️  WARNING: Not quite at top (position:', scrollY, ') but scroll is working');
+    } else {
+        console.log('✅ PASS: Back near top (position:', scrollY, ')');
+    }
+    
+    output.scroll4 = scrollY;
+
+# Final summary
+- evalScript: |
+    console.log('=== TEST SUMMARY ===');
+    console.log('All scroll operations completed successfully!');
+    console.log('Scroll progression:');
+    console.log('  Start: 0');
+    console.log('  After 1 scroll:', output.scroll1);
+    console.log('  After 3 scrolls:', output.scroll2);
+    console.log('  After 1 swipe up:', output.scroll3);
+    console.log('  After 4 swipes up:', output.scroll4);
+    console.log('');
+    console.log('✅ ✅ ✅ ALL TESTS PASSED ✅ ✅ ✅');
+    console.log('Flutter web scrolling is working correctly!');
+

@@ -1,6 +1,7 @@
 package maestro.cli.command
 
 import maestro.cli.App
+import maestro.cli.CliError
 import maestro.cli.DisableAnsiMixin
 import maestro.cli.ShowHelpMixin
 import maestro.cli.report.TestDebugReporter
@@ -9,13 +10,17 @@ import maestro.cli.view.blue
 import maestro.cli.view.bold
 import maestro.cli.view.box
 import maestro.cli.view.faint
+import maestro.orchestra.workspace.WorkspaceExecutionPlanner
+import maestro.orchestra.yaml.YamlCommandReader
 import maestro.studio.MaestroStudio
 import picocli.CommandLine
 import java.awt.Desktop
+import java.io.File
 import java.net.URI
 import java.util.concurrent.Callable
 import maestro.cli.util.getFreePort
 import picocli.CommandLine.Option
+import kotlin.io.path.exists
 
 @CommandLine.Command(
     name = "studio",
@@ -58,6 +63,12 @@ class StudioCommand : Callable<Int> {
     )
     private var appleTeamId: String? = null
 
+    @Option(
+        names = ["--config"],
+        description = ["Path to config.yaml file or workspace directory containing config.yaml. Required for web platform features like selectorAliases."]
+    )
+    private var configPath: File? = null
+
     override fun call(): Int {
         println()
         println("""
@@ -72,6 +83,32 @@ class StudioCommand : Callable<Int> {
 
         TestDebugReporter.install(debugOutputPathAsString = debugOutput, printToConsole = parent?.verbose == true)
 
+        // Build execution plan from config if provided
+        val executionPlan = configPath?.let { path ->
+            val configFile = if (path.isDirectory) {
+                // Look for config.yaml or config.yml in the directory
+                val yamlPath = path.toPath().resolve("config.yaml")
+                val ymlPath = path.toPath().resolve("config.yml")
+                when {
+                    yamlPath.exists() -> yamlPath.toFile()
+                    ymlPath.exists() -> ymlPath.toFile()
+                    else -> throw CliError("No config.yaml or config.yml found in ${path.absolutePath}")
+                }
+            } else {
+                if (!path.exists()) {
+                    throw CliError("Config file does not exist: ${path.absolutePath}")
+                }
+                path
+            }
+            
+            val workspaceConfig = YamlCommandReader.readWorkspaceConfig(configFile.toPath())
+            WorkspaceExecutionPlanner.ExecutionPlan(
+                flowsToRun = emptyList(),
+                sequence = WorkspaceExecutionPlanner.FlowSequence(emptyList()),
+                workspaceConfig = workspaceConfig
+            )
+        }
+
         MaestroSessionManager.newSession(
             host = parent?.host,
             port = parent?.port,
@@ -80,11 +117,13 @@ class StudioCommand : Callable<Int> {
             deviceId = parent?.deviceId,
             platform = parent?.platform,
             isStudio = true,
+            executionPlan = executionPlan,
         ) { session ->
             session.maestro.setAndroidChromeDevToolsEnabled(androidWebViewHierarchy == "devtools")
 
             val port = getFreePort()
-            MaestroStudio.start(port, session.maestro)
+            val selectorAliases = executionPlan?.workspaceConfig?.platform?.web?.selectorAliases ?: emptyMap()
+            MaestroStudio.start(port, session.maestro, selectorAliases)
 
             val studioUrl = "http://localhost:${port}"
             val message = ("Maestro Studio".bold() + " is running at " + studioUrl.blue()).box()

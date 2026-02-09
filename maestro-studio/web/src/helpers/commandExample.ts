@@ -138,6 +138,17 @@ const getSelectors = (
       definition: uiElement.accessibilityText,
     });
   }
+  // Add custom identifiers from selectorAliases config
+  // These are custom attributes like flutterId, ariaLabel, etc.
+  if (uiElement.customIdentifiers) {
+    Object.entries(uiElement.customIdentifiers).forEach(([key, value]) => {
+      selectors.push({
+        title: key, // e.g., "flutterId"
+        status: "available",
+        definition: { [key]: value },
+      });
+    });
+  }
   return selectors;
 };
 

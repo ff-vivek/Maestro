@@ -1,0 +1,151 @@
+url: http://localhost:8001/e2e/workspaces/flutter_web_identifier/test_flutter_scroll.html
+---
+# Test Flutter Web Scrolling - DEBUG VERSION
+# This version includes extensive logging to help debug issues
+
+- launchApp
+
+# Debug: Check if page loaded
+- evalScript: |
+    console.log('=== MAESTRO DEBUG: Page Loaded ===');
+    console.log('Document ready state:', document.readyState);
+    console.log('Body exists:', !!document.body);
+    console.log('Flutter view exists:', !!document.querySelector('flutter-view'));
+    output.result = 'Page loaded: ' + document.readyState;
+
+# Debug: Check Flutter detection
+- evalScript: |
+    console.log('=== MAESTRO DEBUG: Checking Flutter Detection ===');
+    const isFlutter = window.maestro.isFlutterApp();
+    console.log('Is Flutter app:', isFlutter);
+    output.isFlutter = isFlutter;
+
+# Debug: Log initial scroll position
+- evalScript: |
+    console.log('=== MAESTRO DEBUG: Initial State ===');
+    const content = document.getElementById('flutter-content');
+    if (content) {
+        const transform = content.style.transform;
+        console.log('Content transform:', transform || 'none');
+    }
+    console.log('Window scroll:', { x: window.scrollX, y: window.scrollY });
+    output.initialState = 'logged';
+
+# Wait for page to load and verify we're at the top
+- assertVisible: "TOP OF PAGE - Start Scrolling Test"
+- assertVisible: "Section 1"
+
+# Debug: Before first scroll
+- evalScript: |
+    console.log('=== MAESTRO DEBUG: About to scroll ===');
+    console.log('Calling scrollFlutter(5, 1)...');
+
+# Test 1: Basic scroll command
+- scroll
+
+# Debug: After first scroll
+- evalScript: |
+    console.log('=== MAESTRO DEBUG: After first scroll ===');
+    const content = document.getElementById('flutter-content');
+    if (content) {
+        const transform = content.style.transform;
+        console.log('Content transform after scroll:', transform || 'none');
+    }
+    output.afterScroll1 = 'logged';
+
+# Give it a moment to settle
+- evalScript: |
+    new Promise(resolve => setTimeout(resolve, 500));
+
+# After scrolling, we should see content that was below
+- assertVisible: "Section 2"
+
+# Debug: Before second batch of scrolls
+- evalScript: |
+    console.log('=== MAESTRO DEBUG: Before scrolls 2 and 3 ===');
+
+# Test 2: Multiple scrolls to reach middle
+- scroll
+- scroll
+
+# Debug: After reaching middle
+- evalScript: |
+    console.log('=== MAESTRO DEBUG: After scrolls 2 and 3 ===');
+    const content = document.getElementById('flutter-content');
+    if (content) {
+        const transform = content.style.transform;
+        console.log('Content transform:', transform || 'none');
+    }
+
+# Should now see middle content
+- assertVisible: "Section 3 - Middle"
+
+# Debug: Before scrolling to bottom
+- evalScript: |
+    console.log('=== MAESTRO DEBUG: Scrolling to bottom ===');
+
+# Test 3: Continue scrolling to bottom
+- scroll
+- scroll
+- scroll
+
+# Debug: At bottom
+- evalScript: |
+    console.log('=== MAESTRO DEBUG: Should be at bottom ===');
+    const content = document.getElementById('flutter-content');
+    if (content) {
+        const transform = content.style.transform;
+        console.log('Content transform:', transform || 'none');
+    }
+
+# Should reach the bottom
+- assertVisible: "BOTTOM OF PAGE - Scroll Test Complete!"
+- assertVisible: "Section 4"
+
+# Debug: Before scrolling back up
+- evalScript: |
+    console.log('=== MAESTRO DEBUG: About to scroll back up ===');
+
+# Test 4: Scroll back up (using swipe down which scrolls content up)
+- swipe:
+    direction: DOWN
+
+# Debug: After swipe up
+- evalScript: |
+    console.log('=== MAESTRO DEBUG: After swipe down (content up) ===');
+    const content = document.getElementById('flutter-content');
+    if (content) {
+        const transform = content.style.transform;
+        console.log('Content transform:', transform || 'none');
+    }
+    
+# Should see content from middle again
+- assertVisible: "Section 3 - Middle"
+
+# Test 5: Multiple swipes to go back to top
+- swipe:
+    direction: DOWN
+- swipe:
+    direction: DOWN
+- swipe:
+    direction: DOWN
+
+# Debug: Back at top
+- evalScript: |
+    console.log('=== MAESTRO DEBUG: Should be back at top ===');
+    const content = document.getElementById('flutter-content');
+    if (content) {
+        const transform = content.style.transform;
+        console.log('Content transform:', transform || 'none');
+    }
+
+# Should be back at the top
+- assertVisible: "TOP OF PAGE - Start Scrolling Test"
+- assertVisible: "Section 1"
+
+# Final debug summary
+- evalScript: |
+    console.log('=== MAESTRO DEBUG: Test Complete ===');
+    console.log('All scroll operations completed successfully!');
+    output.testComplete = true;
+

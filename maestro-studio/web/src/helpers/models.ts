@@ -23,6 +23,7 @@ export type UIElement = {
   hintText?: string;
   textIndex?: number;
   accessibilityText?: string;
+  customIdentifiers?: Record<string, string>; // Custom identifiers from selectorAliases config
 };
 
 export type DeviceScreen = {

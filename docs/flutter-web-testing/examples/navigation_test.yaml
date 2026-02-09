@@ -1,0 +1,131 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Navigation Test Example
+# ═══════════════════════════════════════════════════════════════════════════════
+# Description: Tests sidebar navigation and menu interactions
+# Prerequisites: User is logged in (uses login subflow)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+url: http://localhost:4446
+name: Sidebar Navigation Test
+tags:
+  - navigation
+  - regression
+  - P2
+
+env:
+  USERNAME: testuser@example.com
+  PASSWORD: SecurePassword123
+
+---
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Setup: Launch and Login
+# ─────────────────────────────────────────────────────────────────────────────
+- launchApp
+- assertVisible: "Login To Application"
+
+# Perform login
+- tapOn: "Enter your User ID"
+- inputText: "${USERNAME}"
+- tapOn: "Enter your password"
+- inputText: "${PASSWORD}"
+- tapOn:
+    flutterId: submit_button
+
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# Verify we're on main screen
+- assertVisible: "Dashboard"
+- takeScreenshot: 01_logged_in
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Test 1: Open Sidebar Menu
+# ─────────────────────────────────────────────────────────────────────────────
+- assertVisible: 
+    text: "Menu button for navigation"
+    label: "Verify menu button is visible"
+
+- tapOn: 
+    text: "Menu button for navigation"
+    label: "Open sidebar menu"
+
+- waitForAnimationToEnd:
+    timeout: 1000
+
+- takeScreenshot: 02_sidebar_open
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Test 2: Navigate to Masters Section
+# ─────────────────────────────────────────────────────────────────────────────
+- assertVisible: "Masters"
+- tapOn: "Masters"
+
+- waitForAnimationToEnd:
+    timeout: 500
+
+- takeScreenshot: 03_masters_expanded
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Test 3: Navigate to Sub-menu Item
+# ─────────────────────────────────────────────────────────────────────────────
+- assertVisible: "Communication Template"
+- tapOn: "Communication Template"
+
+- waitForAnimationToEnd:
+    timeout: 2000
+
+- takeScreenshot: 04_communication_template_page
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Test 4: Verify Page Content Loaded
+# ─────────────────────────────────────────────────────────────────────────────
+- assertVisible:
+    text: "Filter"
+    timeout: 5000
+    optional: true
+
+- takeScreenshot: 05_page_content_visible
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Test 5: Navigate Back Using Breadcrumb or Back Button
+# ─────────────────────────────────────────────────────────────────────────────
+- back
+- waitForAnimationToEnd:
+    timeout: 1000
+
+- assertVisible: "Dashboard"
+- takeScreenshot: 06_back_to_dashboard
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Test 6: Test Another Navigation Path (Broadcast Section)
+# ─────────────────────────────────────────────────────────────────────────────
+- tapOn: "Menu button for navigation"
+- waitForAnimationToEnd:
+    timeout: 500
+
+- tapOn: "Broadcast"
+- waitForAnimationToEnd:
+    timeout: 500
+
+- assertVisible: "Bulk Communication"
+- tapOn: "Bulk Communication"
+
+- waitForAnimationToEnd:
+    timeout: 2000
+
+- takeScreenshot: 07_broadcast_page
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Test 7: Verify Broadcast Page Elements
+# ─────────────────────────────────────────────────────────────────────────────
+- assertVisible:
+    flutterId: broadcast_type_dropdown
+    timeout: 5000
+    label: "Verify broadcast dropdown is present"
+
+- takeScreenshot: 08_broadcast_elements_visible
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Test Complete
+# ═══════════════════════════════════════════════════════════════════════════════

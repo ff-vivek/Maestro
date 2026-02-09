@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flutter Web Multi-Carousel Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #141414;
+            color: white;
+        }
+        
+        flutter-view {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        #main-content {
+            padding: 20px;
+            transition: transform 0.3s ease-out;
+        }
+        
+        .header {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            color: #e50914;
+        }
+        
+        .carousel-section {
+            margin-bottom: 40px;
+        }
+        
+        .carousel-title {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            padding-left: 10px;
+        }
+        
+        .carousel-container {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .carousel-track {
+            display: flex;
+            gap: 15px;
+            transition: transform 0.4s ease-out;
+            padding: 10px;
+        }
+        
+        .carousel-item {
+            flex-shrink: 0;
+            width: 200px;
+            height: 120px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            color: white;
+            font-weight: 600;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
+        
+        .carousel-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        }
+        
+        .carousel-item .item-title {
+            font-size: 14px;
+            margin-top: 8px;
+        }
+        
+        .carousel-item .item-icon {
+            font-size: 32px;
+        }
+        
+        /* Carousel 1: Movies - Red theme */
+        .carousel-movies .carousel-item:nth-child(1) { background: linear-gradient(135deg, #e50914 0%, #831010 100%); }
+        .carousel-movies .carousel-item:nth-child(2) { background: linear-gradient(135deg, #ff6b6b 0%, #c0392b 100%); }
+        .carousel-movies .carousel-item:nth-child(3) { background: linear-gradient(135deg, #e74c3c 0%, #922b21 100%); }
+        .carousel-movies .carousel-item:nth-child(4) { background: linear-gradient(135deg, #ff7675 0%, #d63031 100%); }
+        .carousel-movies .carousel-item:nth-child(5) { background: linear-gradient(135deg, #fab1a0 0%, #e17055 100%); }
+        .carousel-movies .carousel-item:nth-child(6) { background: linear-gradient(135deg, #ff9ff3 0%, #f368e0 100%); }
+        .carousel-movies .carousel-item:nth-child(7) { background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%); }
+        .carousel-movies .carousel-item:nth-child(8) { background: linear-gradient(135deg, #dfe6e9 0%, #b2bec3 100%); }
+        
+        /* Carousel 2: TV Shows - Blue theme */
+        .carousel-tv .carousel-item:nth-child(1) { background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); }
+        .carousel-tv .carousel-item:nth-child(2) { background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%); }
+        .carousel-tv .carousel-item:nth-child(3) { background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%); }
+        .carousel-tv .carousel-item:nth-child(4) { background: linear-gradient(135deg, #81ecec 0%, #00cec9 100%); }
+        .carousel-tv .carousel-item:nth-child(5) { background: linear-gradient(135deg, #55efc4 0%, #00b894 100%); }
+        .carousel-tv .carousel-item:nth-child(6) { background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%); }
+        .carousel-tv .carousel-item:nth-child(7) { background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%); }
+        .carousel-tv .carousel-item:nth-child(8) { background: linear-gradient(135deg, #dfe6e9 0%, #b2bec3 100%); }
+        
+        /* Carousel 3: Music - Green theme */
+        .carousel-music .carousel-item:nth-child(1) { background: linear-gradient(135deg, #1db954 0%, #191414 100%); }
+        .carousel-music .carousel-item:nth-child(2) { background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); }
+        .carousel-music .carousel-item:nth-child(3) { background: linear-gradient(135deg, #00b894 0%, #00cec9 100%); }
+        .carousel-music .carousel-item:nth-child(4) { background: linear-gradient(135deg, #55efc4 0%, #00b894 100%); }
+        .carousel-music .carousel-item:nth-child(5) { background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%); }
+        .carousel-music .carousel-item:nth-child(6) { background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%); }
+        .carousel-music .carousel-item:nth-child(7) { background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%); }
+        .carousel-music .carousel-item:nth-child(8) { background: linear-gradient(135deg, #dfe6e9 0%, #b2bec3 100%); }
+        
+        /* Carousel 4: Games - Purple theme */
+        .carousel-games .carousel-item:nth-child(1) { background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); }
+        .carousel-games .carousel-item:nth-child(2) { background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%); }
+        .carousel-games .carousel-item:nth-child(3) { background: linear-gradient(135deg, #e84393 0%, #fd79a8 100%); }
+        .carousel-games .carousel-item:nth-child(4) { background: linear-gradient(135deg, #00cec9 0%, #81ecec 100%); }
+        .carousel-games .carousel-item:nth-child(5) { background: linear-gradient(135deg, #fdcb6e 0%, #ffeaa7 100%); }
+        .carousel-games .carousel-item:nth-child(6) { background: linear-gradient(135deg, #e17055 0%, #fab1a0 100%); }
+        .carousel-games .carousel-item:nth-child(7) { background: linear-gradient(135deg, #00b894 0%, #55efc4 100%); }
+        .carousel-games .carousel-item:nth-child(8) { background: linear-gradient(135deg, #0984e3 0%, #74b9ff 100%); }
+        
+        /* Carousel 5: Podcasts - Orange theme */
+        .carousel-podcasts .carousel-item:nth-child(1) { background: linear-gradient(135deg, #e67e22 0%, #d35400 100%); }
+        .carousel-podcasts .carousel-item:nth-child(2) { background: linear-gradient(135deg, #f39c12 0%, #f1c40f 100%); }
+        .carousel-podcasts .carousel-item:nth-child(3) { background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); }
+        .carousel-podcasts .carousel-item:nth-child(4) { background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); }
+        .carousel-podcasts .carousel-item:nth-child(5) { background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%); }
+        .carousel-podcasts .carousel-item:nth-child(6) { background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); }
+        .carousel-podcasts .carousel-item:nth-child(7) { background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); }
+        .carousel-podcasts .carousel-item:nth-child(8) { background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%); }
+        
+        .scroll-indicator {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 100;
+        }
+        
+        .scroll-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transition: all 0.3s;
+        }
+        
+        .scroll-dot.active {
+            background: #e50914;
+            transform: scale(1.5);
+        }
+        
+        .footer {
+            padding: 40px 20px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .debug-info {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-family: monospace;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <flutter-view id="flutter-root">
+        <div id="main-content">
+            <div class="header" flt-semantics-identifier="page-header">🎬 StreamFlix</div>
+            
+            <!-- Carousel 1: Trending Movies -->
+            <div class="carousel-section" flt-semantics-identifier="section-movies" data-carousel="0">
+                <div class="carousel-title" flt-semantics-identifier="title-movies">🎬 Trending Movies</div>
+                <div class="carousel-container carousel-movies">
+                    <div class="carousel-track" data-position="0">
+                        <div class="carousel-item" flt-semantics-identifier="movie-1"><span class="item-icon">🎬</span><span class="item-title">Movie 1</span></div>
+                        <div class="carousel-item" flt-semantics-identifier="movie-2"><span class="item-icon">🎥</span><span class="item-title">Movie 2</span></div>
+                        <div class="carousel-item" flt-semantics-identifier="movie-3"><span class="item-icon">🍿</span><span class="item-title">Movie 3</span></div>
+                        <div class="carousel-item" flt-semantics-identifier="movie-4"><span class="item-icon">🎞️</span><span class="item-title">Movie 4</span></div>
+                        <div class="carousel-item" flt-semantics-identifier="movie-5"><span class="item-icon">📽️</span><span class="item-title">Movie 5</span></div>
+                        <div class="carousel-item" flt-semantics-identifier="movie-6"><span class="item-icon">🎦</span><span class="item-title">Movie 6</span></div>
+                        <div class="carousel-item" flt-semantics-identifier="movie-7"><span class="item-icon">🎭</span><span class="item-title">Movie 7</span></div>
+                        <div class="carousel-item" flt-semantics-identifier="movie-8"><span class="item-icon">🎪</span><span class="item-title">Movie 8</span></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Carousel 2: TV Shows -->
+            <div class="carousel-section" flt-semantics-identifier="section-tv" data-carousel="1">
+                <div class="carousel-title" flt-semantics-identifier="title-tv">📺 Popular TV Shows</div>
+                <div class="carousel-container carousel-tv">
+                    <div class="carousel-track" data-position="0">
+                        <div class="carousel-item" flt-semantics-identifier="tv-1"><span class="item-icon">📺</span><span class="item-title">Show 1</span></div>
+                        <div class="carousel-item" flt-semantics-identifier="tv-2"><span class="item-icon">📻</span><span class="item-title">Show 2</span></div>
+                        <div class="carousel-item" flt-semantics-identifier="tv-3"><span class="item-icon">🖥️</span><span class="item-title">Show 3</span></div>
+                        <div class="carousel-item" flt-semantics-identifier="tv-4"><span class="item-icon">📡</span><span class="item-title">Show 4</span></div>
+                        <div class="carousel-item" flt-semantics-identifier="tv-5"><span class="item-icon">📱</span><span class="item-title">Show 5</span></div>
+                        <div class="carousel-item" flt-semantics-identifier="tv-6"><span class="item-icon">💻</span><span class="item-title">Show 6</span></div>
+                        <div class="carousel-item" flt-semantics-identifier="tv-7"><span class="item-icon">🎮</span><span class="item-title">Show 7</span></div>
+                        <div class="carousel-item" flt-semantics-identifier="tv-8"><span class="item-icon">🕹️</span><span class="item-title">Show 8</span></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Carousel 3: Music -->
+            <div class="carousel-section" flt-semantics-identifier="section-music" data-carousel="2">
+                <div class="carousel-title" flt-semantics-identifier="title-music">🎵 Top Music</div>
+                <div class="carousel-container carousel-music">
+                    <div class="carousel-track" data-position="0">
+                        <div class="carousel-item" flt-semantics-identifier="music-1"><span class="item-icon">🎵</span><span class="item-title">Album 1</span></div>
+                        <div class="carousel-item" flt-semantics-identifier="music-2"><span class="item-icon">🎶</span><span class="item-title">Album 2</span></div>
+                        <div class="carousel-item" flt-semantics-identifier="music-3"><span class="item-icon">🎤</span><span class="item-title">Album 3</span></div>
+                        <div class="carousel-item" flt-semantics-identifier="music-4"><span class="item-icon">🎧</span><span class="item-title">Album 4</span></div>
+                        <div class="carousel-item" flt-semantics-identifier="music-5"><span class="item-icon">🎸</span><span class="item-title">Album 5</span></div>
+                        <div class="carousel-item" flt-semantics-identifier="music-6"><span class="item-icon">🎹</span><span class="item-title">Album 6</span></div>
+                        <div class="carousel-item" flt-semantics-identifier="music-7"><span class="item-icon">🥁</span><span class="item-title">Album 7</span></div>
+                        <div class="carousel-item" flt-semantics-identifier="music-8"><span class="item-icon">🎺</span><span class="item-title">Album 8</span></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Carousel 4: Games -->
+            <div class="carousel-section" flt-semantics-identifier="section-games" data-carousel="3">
+                <div class="carousel-title" flt-semantics-identifier="title-games">🎮 Featured Games</div>
+                <div class="carousel-container carousel-games">
+                    <div class="carousel-track" data-position="0">
+                        <div class="carousel-item" flt-semantics-identifier="game-1"><span class="item-icon">🎮</span><span class="item-title">Game 1</span></div>
+                        <div class="carousel-item" flt-semantics-identifier="game-2"><span class="item-icon">🕹️</span><span class="item-title">Game 2</span></div>
+                        <div class="carousel-item" flt-semantics-identifier="game-3"><span class="item-icon">👾</span><span class="item-title">Game 3</span></div>
+                        <div class="carousel-item" flt-semantics-identifier="game-4"><span class="item-icon">🎯</span><span class="item-title">Game 4</span></div>
+                        <div class="carousel-item" flt-semantics-identifier="game-5"><span class="item-icon">🏆</span><span class="item-title">Game 5</span></div>
+                        <div class="carousel-item" flt-semantics-identifier="game-6"><span class="item-icon">⚔️</span><span class="item-title">Game 6</span></div>
+                        <div class="carousel-item" flt-semantics-identifier="game-7"><span class="item-icon">🛡️</span><span class="item-title">Game 7</span></div>
+                        <div class="carousel-item" flt-semantics-identifier="game-8"><span class="item-icon">🏰</span><span class="item-title">Game 8</span></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Carousel 5: Podcasts -->
+            <div class="carousel-section" flt-semantics-identifier="section-podcasts" data-carousel="4">
+                <div class="carousel-title" flt-semantics-identifier="title-podcasts">🎙️ Top Podcasts</div>
+                <div class="carousel-container carousel-podcasts">
+                    <div class="carousel-track" data-position="0">
+                        <div class="carousel-item" flt-semantics-identifier="podcast-1"><span class="item-icon">🎙️</span><span class="item-title">Podcast 1</span></div>
+                        <div class="carousel-item" flt-semantics-identifier="podcast-2"><span class="item-icon">🎧</span><span class="item-title">Podcast 2</span></div>
+                        <div class="carousel-item" flt-semantics-identifier="podcast-3"><span class="item-icon">📻</span><span class="item-title">Podcast 3</span></div>
+                        <div class="carousel-item" flt-semantics-identifier="podcast-4"><span class="item-icon">🗣️</span><span class="item-title">Podcast 4</span></div>
+                        <div class="carousel-item" flt-semantics-identifier="podcast-5"><span class="item-icon">💬</span><span class="item-title">Podcast 5</span></div>
+                        <div class="carousel-item" flt-semantics-identifier="podcast-6"><span class="item-icon">📢</span><span class="item-title">Podcast 6</span></div>
+                        <div class="carousel-item" flt-semantics-identifier="podcast-7"><span class="item-icon">📣</span><span class="item-title">Podcast 7</span></div>
+                        <div class="carousel-item" flt-semantics-identifier="podcast-8"><span class="item-icon">🔊</span><span class="item-title">Podcast 8</span></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer" flt-semantics-identifier="footer">
+                🎬 End of Content - Scroll up to see more
+            </div>
+        </div>
+        
+        <div class="scroll-indicator">
+            <div class="scroll-dot active" data-section="0"></div>
+            <div class="scroll-dot" data-section="1"></div>
+            <div class="scroll-dot" data-section="2"></div>
+            <div class="scroll-dot" data-section="3"></div>
+            <div class="scroll-dot" data-section="4"></div>
+        </div>
+        
+        <div class="debug-info" id="debug-info">
+            Scroll: 0 | Active Carousel: Movies
+        </div>
+    </flutter-view>
+    
+    <script>
+        console.log('[Carousel Test] Script loading...');
+        
+        const flutterView = document.querySelector('flutter-view');
+        const mainContent = document.getElementById('main-content');
+        const debugInfo = document.getElementById('debug-info');
+        const carouselTracks = document.querySelectorAll('.carousel-track');
+        const scrollDots = document.querySelectorAll('.scroll-dot');
+        const carouselSections = document.querySelectorAll('.carousel-section');
+        
+        let verticalScrollPosition = 0;
+        let activeCarouselIndex = 0;
+        const carouselPositions = [0, 0, 0, 0, 0]; // Track position of each carousel
+        const itemWidth = 215; // 200px item + 15px gap
+        const maxCarouselScroll = itemWidth * 5; // Can scroll 5 items to the right
+        
+        function updateDebugInfo() {
+            const carouselNames = ['Movies', 'TV Shows', 'Music', 'Games', 'Podcasts'];
+            debugInfo.textContent = `Scroll: ${Math.round(verticalScrollPosition)} | Active: ${carouselNames[activeCarouselIndex]} | Pos: ${carouselPositions[activeCarouselIndex]}`;
+        }
+        
+        function updateScrollIndicator() {
+            // Calculate which section is most visible
+            const sectionHeight = 200; // Approximate height of each section
+            const visibleSection = Math.min(4, Math.floor(verticalScrollPosition / sectionHeight));
+            
+            scrollDots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === visibleSection);
+            });
+            
+            activeCarouselIndex = visibleSection;
+        }
+        
+        function scrollCarousel(carouselIndex, deltaX) {
+            const track = carouselTracks[carouselIndex];
+            if (!track) return;
+            
+            // Update position
+            carouselPositions[carouselIndex] += deltaX;
+            
+            // Clamp position
+            carouselPositions[carouselIndex] = Math.max(0, Math.min(carouselPositions[carouselIndex], maxCarouselScroll));
+            
+            // Apply transform
+            track.style.transform = `translateX(-${carouselPositions[carouselIndex]}px)`;
+            
+            console.log(`[Carousel Test] Carousel ${carouselIndex} scrolled to position: ${carouselPositions[carouselIndex]}`);
+        }
+        
+        function scrollVertical(deltaY) {
+            const maxScroll = mainContent.scrollHeight - window.innerHeight;
+            
+            // Amplify vertical scroll for better responsiveness
+            const amplifiedDelta = deltaY * 1.5;
+            
+            verticalScrollPosition += amplifiedDelta;
+            verticalScrollPosition = Math.max(0, Math.min(verticalScrollPosition, maxScroll));
+            
+            mainContent.style.transform = `translateY(-${verticalScrollPosition}px)`;
+            
+            updateScrollIndicator();
+            console.log(`[Carousel Test] Vertical scroll: ${verticalScrollPosition} (delta: ${deltaY}, amplified: ${amplifiedDelta})`);
+        }
+        
+        // Handle wheel events (Maestro sends wheel events for Flutter web)
+        let accumulatedDeltaX = 0;
+        let accumulatedDeltaY = 0;
+        let wheelTimeout = null;
+        
+        flutterView.addEventListener('wheel', (event) => {
+            event.preventDefault();
+            
+            console.log('[Carousel Test] Wheel event:', {
+                deltaX: event.deltaX,
+                deltaY: event.deltaY,
+                deltaMode: event.deltaMode
+            });
+            
+            // Accumulate deltas
+            accumulatedDeltaX += event.deltaX;
+            accumulatedDeltaY += event.deltaY;
+            
+            // Clear previous timeout
+            if (wheelTimeout) clearTimeout(wheelTimeout);
+            
+            wheelTimeout = setTimeout(() => {
+                const absDeltaX = Math.abs(accumulatedDeltaX);
+                const absDeltaY = Math.abs(accumulatedDeltaY);
+                
+                console.log('[Carousel Test] Accumulated deltas:', { 
+                    deltaX: accumulatedDeltaX, 
+                    deltaY: accumulatedDeltaY 
+                });
+                
+                // Determine if horizontal or vertical scroll
+                // Lower threshold for better sensitivity
+                if (absDeltaX > absDeltaY * 1.5 && absDeltaX > 20) {
+                    // Horizontal scroll - scroll the active carousel
+                    console.log('[Carousel Test] -> Horizontal scroll detected');
+                    scrollCarousel(activeCarouselIndex, accumulatedDeltaX);
+                } else if (absDeltaY > 20) {
+                    // Vertical scroll - scroll the page
+                    console.log('[Carousel Test] -> Vertical scroll detected');
+                    scrollVertical(accumulatedDeltaY);
+                }
+                
+                updateDebugInfo();
+                accumulatedDeltaX = 0;
+                accumulatedDeltaY = 0;
+            }, 100);
+        }, { passive: false });
+        
+        // Handle pointer/touch events for manual testing
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let isDragging = false;
+        
+        flutterView.addEventListener('pointerdown', (event) => {
+            touchStartX = event.clientX;
+            touchStartY = event.clientY;
+            isDragging = true;
+        });
+        
+        flutterView.addEventListener('pointerup', (event) => {
+            if (!isDragging) return;
+            isDragging = false;
+            
+            const deltaX = touchStartX - event.clientX;
+            const deltaY = touchStartY - event.clientY;
+            const absDeltaX = Math.abs(deltaX);
+            const absDeltaY = Math.abs(deltaY);
+            
+            if (absDeltaX > absDeltaY && absDeltaX > 50) {
+                // Horizontal swipe on active carousel
+                scrollCarousel(activeCarouselIndex, deltaX > 0 ? itemWidth : -itemWidth);
+            } else if (absDeltaY > 50) {
+                // Vertical swipe
+                scrollVertical(deltaY > 0 ? 200 : -200);
+            }
+            
+            updateDebugInfo();
+        });
+        
+        flutterView.addEventListener('pointercancel', () => {
+            isDragging = false;
+        });
+        
+        // Handle item clicks
+        document.querySelectorAll('.carousel-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const id = item.getAttribute('flt-semantics-identifier');
+                console.log('[Carousel Test] Item clicked:', id);
+                alert(`Clicked: ${id}`);
+            });
+        });
+        
+        // Add Flutter markers
+        const glassPane = document.createElement('div');
+        glassPane.setAttribute('flt-glass-pane', '');
+        glassPane.style.cssText = 'position: absolute; pointer-events: none;';
+        flutterView.appendChild(glassPane);
+        document.body.setAttribute('flt-renderer', 'html');
+        
+        updateDebugInfo();
+        
+        console.log('[Carousel Test] ==================================');
+        console.log('[Carousel Test] Multi-carousel test page loaded');
+        console.log('[Carousel Test] 5 carousels with 8 items each');
+        console.log('[Carousel Test] Ready for testing!');
+        console.log('[Carousel Test] ==================================');
+    </script>
+</body>
+</html>

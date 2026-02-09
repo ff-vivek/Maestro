@@ -1,0 +1,256 @@
+url: http://localhost:8001/e2e/workspaces/flutter_web/test_flutter_carousel.html
+---
+# Test Flutter Web Multi-Carousel Page
+# This test demonstrates scrolling multiple horizontal carousels on a single page
+# Similar to Netflix, Spotify, or any app with multiple horizontal lists
+#
+# Key Feature: Uses element-targeted swipes with "from:" to swipe on specific carousels
+#
+# Page Structure:
+# - 5 Carousels stacked vertically (Movies, TV Shows, Music, Games, Podcasts)
+# - Each carousel has 8 items that can be swiped horizontally
+# - Vertical swipe/scroll to navigate between carousels
+
+- launchApp
+
+# ============================================
+# SECTION 1: Verify Initial Page State
+# ============================================
+
+# Verify header and first carousel visible
+- assertVisible:
+    flutterId: "page-header"
+- assertVisible:
+    flutterId: "title-movies"
+
+# Verify movie items are visible
+- assertVisible:
+    flutterId: "movie-1"
+- assertVisible:
+    flutterId: "movie-2"
+- assertVisible:
+    flutterId: "movie-3"
+
+# ============================================
+# SECTION 2: Swipe on Movies Carousel (using from:)
+# ============================================
+
+# Swipe LEFT on Movies carousel to see more movies
+- swipe:
+    direction: LEFT
+    from:
+      flutterId: "section-movies"
+    duration: 400
+
+- extendedWaitUntil:
+    visible:
+      flutterId: "movie-5"
+    timeout: 3000
+
+# Swipe LEFT again on Movies carousel
+- swipe:
+    direction: LEFT
+    from:
+      flutterId: "section-movies"
+    duration: 400
+
+- extendedWaitUntil:
+    visible:
+      flutterId: "movie-7"
+    timeout: 3000
+
+# Swipe RIGHT on Movies carousel to go back
+- swipe:
+    direction: RIGHT
+    from:
+      flutterId: "section-movies"
+    duration: 400
+
+- extendedWaitUntil:
+    visible:
+      flutterId: "movie-4"
+    timeout: 3000
+
+# ============================================
+# SECTION 3: Scroll Down & Swipe on TV Shows Carousel
+# ============================================
+
+# Use scrollUntilVisible to scroll down to TV Shows section
+- scrollUntilVisible:
+    element:
+      flutterId: "section-tv"
+    direction: DOWN
+    timeout: 10000
+
+- assertVisible:
+    flutterId: "title-tv"
+- assertVisible:
+    flutterId: "tv-1"
+
+# Swipe LEFT on TV Shows carousel (targeting specific element)
+- swipe:
+    direction: LEFT
+    from:
+      flutterId: "section-tv"
+    duration: 400
+
+- extendedWaitUntil:
+    visible:
+      flutterId: "tv-4"
+    timeout: 3000
+
+# Swipe LEFT again on TV Shows carousel
+- swipe:
+    direction: LEFT
+    from:
+      flutterId: "section-tv"
+    duration: 400
+
+- extendedWaitUntil:
+    visible:
+      flutterId: "tv-6"
+    timeout: 3000
+
+# ============================================
+# SECTION 4: Scroll Down & Swipe on Music Carousel
+# ============================================
+
+# Scroll down to Music section
+- scrollUntilVisible:
+    element:
+      flutterId: "section-music"
+    direction: DOWN
+    timeout: 10000
+
+- assertVisible:
+    flutterId: "title-music"
+- assertVisible:
+    flutterId: "music-1"
+
+# Swipe LEFT on Music carousel
+- swipe:
+    direction: LEFT
+    from:
+      flutterId: "section-music"
+    duration: 400
+
+- extendedWaitUntil:
+    visible:
+      flutterId: "music-4"
+    timeout: 3000
+
+# Swipe LEFT again on Music carousel
+- swipe:
+    direction: LEFT
+    from:
+      flutterId: "section-music"
+    duration: 400
+
+- extendedWaitUntil:
+    visible:
+      flutterId: "music-6"
+    timeout: 3000
+
+# ============================================
+# SECTION 5: Scroll Down & Swipe on Games Carousel
+# ============================================
+
+# Scroll down to Games section
+- scrollUntilVisible:
+    element:
+      flutterId: "section-games"
+    direction: DOWN
+    timeout: 10000
+
+- assertVisible:
+    flutterId: "title-games"
+- assertVisible:
+    flutterId: "game-1"
+
+# Swipe LEFT on Games carousel
+- swipe:
+    direction: LEFT
+    from:
+      flutterId: "section-games"
+    duration: 400
+
+- extendedWaitUntil:
+    visible:
+      flutterId: "game-4"
+    timeout: 3000
+
+# Swipe RIGHT on Games carousel to go back
+- swipe:
+    direction: RIGHT
+    from:
+      flutterId: "section-games"
+    duration: 400
+
+- extendedWaitUntil:
+    visible:
+      flutterId: "game-2"
+    timeout: 3000
+
+# ============================================
+# SECTION 6: Scroll Down & Swipe on Podcasts Carousel
+# ============================================
+
+# Scroll down to Podcasts section
+- scrollUntilVisible:
+    element:
+      flutterId: "section-podcasts"
+    direction: DOWN
+    timeout: 10000
+
+- assertVisible:
+    flutterId: "title-podcasts"
+- assertVisible:
+    flutterId: "podcast-1"
+
+# Swipe LEFT on Podcasts carousel
+- swipe:
+    direction: LEFT
+    from:
+      flutterId: "section-podcasts"
+    duration: 400
+
+- extendedWaitUntil:
+    visible:
+      flutterId: "podcast-4"
+    timeout: 3000
+
+# ============================================
+# SECTION 7: Verify Footer and Scroll Back Up
+# ============================================
+
+# Scroll to see footer
+- scrollUntilVisible:
+    element:
+      flutterId: "footer"
+    direction: DOWN
+    timeout: 10000
+
+- assertVisible:
+    flutterId: "footer"
+
+# Scroll back up to the top
+- scrollUntilVisible:
+    element:
+      flutterId: "page-header"
+    direction: UP
+    timeout: 10000
+
+# Verify we're back at the top
+- assertVisible:
+    flutterId: "page-header"
+- assertVisible:
+    flutterId: "title-movies"
+
+# ============================================
+# SECTION 8: Tap on Items (Interactive Test)
+# ============================================
+
+# Tap on a movie item
+- tapOn:
+    flutterId: "movie-1"
+

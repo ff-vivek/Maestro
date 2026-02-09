@@ -1,0 +1,70 @@
+# To run: python3 -m http.server 8001 (from this directory)
+url: http://localhost:8001/e2e/workspaces/flutter_web_identifier/test_app.html
+# Note: identifierConfig has been moved to workspace config.yaml under platform.web.identifierConfig
+# See config.yaml in this workspace directory
+---
+# Test Flutter Web with flt-semantics-identifier support
+# This test demonstrates how to configure custom identifiers for Flutter Web
+
+- launchApp
+
+# Wait for page to load
+- assertVisible: "Flutter Web Identifier Test Page"
+
+# Test 1: Use flutterId selector for Flutter identifiers on text fields
+- tapOn:
+    flutterId: "username_field"
+    ariaLabelId: "Username"
+- inputText: "testuser123"
+
+- tapOn:
+    flutterId: "email_field"
+    ariaLabelId: "Email"
+- inputText: "test@example.com"
+
+# Test 2: Use flutterId selector for checkbox
+- tapOn:
+    flutterId: "agree_checkbox"
+    retryTapIfNoChange: true
+
+# Verify checkbox is checked
+- assertVisible: "✓ I agree to the terms and conditions"
+
+# Test 3: Use flutterId selector for button
+- tapOn:
+    flutterId: "submit_button"
+
+# Verify form submission
+- assertVisible: "Form Submitted Successfully!"
+- assertVisible: "Username: testuser123"
+- assertVisible: "Email: test@example.com"
+- assertVisible: "Agreed to terms: (Yes|No)"
+
+# Test 4: Use flutterId selector for cancel button
+- tapOn:
+    flutterId: "cancel_button"
+
+# Verify form is cleared
+- assertNotVisible: "Form Submitted Successfully!"
+
+# Test 5: Test tab selection using Flutter identifiers
+- tapOn:
+    flutterId: "profile_tab"
+
+
+
+- tapOn:
+    flutterId: "settings_tab"
+
+
+
+- tapOn:
+    flutterId: "home_tab"
+# Test 6: Combine flutterId selector with other selectors
+- tapOn:
+    flutterId: "submit_button"
+
+- assertVisible: "Form Submitted Successfully!"
+
+
+

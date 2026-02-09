@@ -28,7 +28,8 @@ data class UIElement(
     val text: String?,
     val hintText: String?,
     val accessibilityText: String?,
-    val textIndex: Int?
+    val textIndex: Int?,
+    val customIdentifiers: Map<String, String>? = null // Custom identifiers from selectorAliases config
 )
 
 enum class ReplCommandStatus {

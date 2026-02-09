@@ -1,0 +1,5 @@
+platform:
+  web:
+    selectorAliases:
+      flt-semantics-identifier: flutterId
+      aria-label: ariaLabelId

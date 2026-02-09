@@ -456,7 +456,7 @@ object MaestroSessionManager {
         screenSize: String?,
         selectorAliases: Map<String, String> = emptyMap()
     ): Maestro {
-        return Maestro.web(isStudio, isHeadless, screenSize, selectorAliases)
+        return Maestro.web(isStudio, isHeadless, selectorAliases, screenSize)
     }
 
     private data class SelectedDevice(

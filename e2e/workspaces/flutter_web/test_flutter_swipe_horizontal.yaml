@@ -1,0 +1,104 @@
+url: http://localhost:8001/e2e/workspaces/flutter_web/test_flutter_swipe_horizontal.html
+---
+# Test Flutter Web Horizontal Swiping (Left and Right)
+# This test verifies that Maestro can perform horizontal swipe gestures on Flutter web applications
+# Use case: Testing carousels, page views, horizontal lists, etc.
+
+- launchApp
+
+# Verify we're on Page 1
+- assertVisible: "Welcome"
+- assertVisible: "Page 1 - Start Here"
+
+# ============================================
+# TEST 1: Swipe LEFT to go to next pages
+# ============================================
+
+# Swipe LEFT to go to Page 2 (Features)
+- swipe:
+    direction: LEFT
+    duration: 500
+
+- extendedWaitUntil:
+    visible: "Page 2 - Discover Features"
+    timeout: 3000
+
+- assertVisible: "Features"
+
+# Swipe LEFT to go to Page 3 (How It Works)
+- swipe:
+    direction: LEFT
+    duration: 500
+
+- extendedWaitUntil:
+    visible: "Page 3 - The Middle"
+    timeout: 3000
+
+- assertVisible: "How It Works"
+
+# Swipe LEFT to go to Page 4 (Benefits)
+- swipe:
+    direction: LEFT
+    duration: 500
+
+- extendedWaitUntil:
+    visible: "Page 4 - Almost There"
+    timeout: 3000
+
+- assertVisible: "Benefits"
+
+# Swipe LEFT to go to Page 5 (Complete)
+- swipe:
+    direction: LEFT
+    duration: 500
+
+- extendedWaitUntil:
+    visible: "Page 5 - The End"
+    timeout: 3000
+
+- assertVisible: "Complete!"
+
+# ============================================
+# TEST 2: Swipe RIGHT to go back
+# ============================================
+
+# Swipe RIGHT to go back to Page 4
+- swipe:
+    direction: RIGHT
+    duration: 500
+
+- extendedWaitUntil:
+    visible: "Page 4 - Almost There"
+    timeout: 3000
+
+- assertVisible: "Benefits"
+
+# Swipe RIGHT to go back to Page 3
+- swipe:
+    direction: RIGHT
+    duration: 500
+
+- extendedWaitUntil:
+    visible: "Page 3 - The Middle"
+    timeout: 3000
+
+# Swipe RIGHT to go back to Page 2
+- swipe:
+    direction: RIGHT
+    duration: 500
+
+- extendedWaitUntil:
+    visible: "Page 2 - Discover Features"
+    timeout: 3000
+
+# Swipe RIGHT to go back to Page 1
+- swipe:
+    direction: RIGHT
+    duration: 500
+
+- extendedWaitUntil:
+    visible: "Page 1 - Start Here"
+    timeout: 3000
+
+- assertVisible: "Welcome"
+

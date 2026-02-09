@@ -1,0 +1,58 @@
+url: http://localhost:8001/e2e/workspaces/flutter_web_identifier/test_flutter_scroll.html
+---
+# Test Flutter Web Scrolling
+# This test verifies that Maestro can scroll Flutter web applications using wheel events
+
+- launchApp
+
+# Wait for page to load and verify we're at the top
+- assertVisible: "TOP OF PAGE - Start Scrolling Test"
+- assertVisible: "Section 1"
+
+# Test 1: Basic scroll command
+- swipe:
+    direction: UP
+    duration: 100
+
+# After scrolling, we should see content that was below
+- assertVisible: "Section 2"
+
+# Test 2: Multiple scrolls to reach middle
+- swipe:
+    direction: DOWN
+    duration: 100
+
+- swipe:
+    direction: UP
+    duration: 300
+
+# Should now see middle content
+- assertVisible: "Section 3 - Middle"
+
+# Test 3: Continue scrolling to bottom
+
+- scroll
+
+# Should reach the bottom
+- assertVisible: "BOTTOM OF PAGE - Scroll Test Complete!"
+- assertVisible: "Section 4"
+
+# Test 4: Scroll back up (using swipe down which scrolls content up)
+- swipe:
+    direction: DOWN
+    duration: 300
+# Should see content from middle again
+- assertVisible: "Section 3 - Middle"
+
+# Test 5: Multiple swipes to go back to top
+- swipe:
+    direction: DOWN
+- swipe:
+    direction: DOWN
+- swipe:
+    direction: DOWN
+
+# Should be back at the top
+- assertVisible: "TOP OF PAGE - Start Scrolling Test"
+- assertVisible: "Section 1"
+

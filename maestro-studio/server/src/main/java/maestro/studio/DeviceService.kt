@@ -52,8 +52,13 @@ object DeviceService {
     private val savedScreenshots = mutableListOf<File>()
 
     private var lastViewHierarchy: TreeNode? = null
+    
+    // Selector aliases from config.yaml - maps HTML attribute names to YAML selector names
+    // e.g., "flt-semantics-identifier" -> "flutterId"
+    private var selectorAliases: Map<String, String> = emptyMap()
 
-    fun routes(routing: Routing, maestro: Maestro) {
+    fun routes(routing: Routing, maestro: Maestro, selectorAliases: Map<String, String> = emptyMap()) {
+        this.selectorAliases = selectorAliases
         routing.post("/api/run-command") {
             val request = call.parseBody<RunCommandRequest>()
             try {
@@ -166,6 +171,14 @@ object DeviceService {
             } else {
                 getIndex(Filters.idMatches(resourceId.toRegexSafe(Orchestra.REGEX_OPTIONS)), element)
             }
+            
+            // Extract custom identifiers based on selectorAliases config
+            // selectorAliases maps: HTML attribute name -> YAML selector name
+            // e.g., "flt-semantics-identifier" -> "flutterId"
+            val customIdentifiers = selectorAliases.mapNotNull { (htmlAttr, yamlKey) ->
+                element.attribute(htmlAttr)?.let { value -> yamlKey to value }
+            }.toMap().takeIf { it.isNotEmpty() }
+            
             fun createElementId(): String {
                 val parts = listOfNotNull(resourceId, resourceIdIndex, text, textIndex)
                 val fallbackId = bounds?.let { (x, y, w, h) -> "$x,$y,$w,$h" } ?: UUID.randomUUID().toString()
@@ -174,7 +187,7 @@ object DeviceService {
                 return if (index == 1) id else "$id-$index"
             }
             val id = createElementId()
-            UIElement(id, bounds, resourceId, resourceIdIndex, text, hintText, accessibilityText, textIndex)
+            UIElement(id, bounds, resourceId, resourceIdIndex, text, hintText, accessibilityText, textIndex, customIdentifiers)
         }
     }
 

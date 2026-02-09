@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flutter Web Scroll Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        flutter-view {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        #flutter-content {
+            height: 200vh; /* Make content scrollable */
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+        
+        .section {
+            min-height: 300px;
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .section h2 {
+            margin-top: 0;
+        }
+        
+        #top-marker {
+            font-size: 24px;
+            font-weight: bold;
+            background: #28a745;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        #bottom-marker {
+            font-size: 24px;
+            font-weight: bold;
+            background: #dc3545;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <flutter-view id="flutter-root">
+        <div id="flutter-content">
+            <div id="top-marker">TOP OF PAGE - Start Scrolling Test</div>
+            
+            <div class="section" data-testid="section-1">
+                <h2>Section 1</h2>
+                <p>This is the first section. You should see this when the page loads.</p>
+                <button id="button-section-1">Button in Section 1</button>
+            </div>
+            
+            <div class="section" data-testid="section-2">
+                <h2>Section 2</h2>
+                <p>This section appears after scrolling down a bit.</p>
+                <button id="button-section-2">Button in Section 2</button>
+            </div>
+            
+            <div class="section" data-testid="section-3">
+                <h2>Section 3 - Middle</h2>
+                <p>You're in the middle of the page now!</p>
+                <button id="button-section-3">Button in Section 3</button>
+            </div>
+            
+            <div class="section" data-testid="section-4">
+                <h2>Section 4</h2>
+                <p>Almost at the bottom...</p>
+                <button id="button-section-4">Button in Section 4</button>
+            </div>
+            
+            <div id="bottom-marker" data-testid="bottom-marker">BOTTOM OF PAGE - Scroll Test Complete!</div>  
+        </div>
+    </flutter-view>
+    
+    <script>
+        console.log('[Test Page] Script loading...');
+        
+        // Simulate Flutter's pointer binding for wheel events
+        const flutterView = document.querySelector('flutter-view');
+        let scrollPosition = 0;
+        const content = document.getElementById('flutter-content');
+        
+        console.log('[Test Page] Elements found:', {
+            flutterView: !!flutterView,
+            content: !!content,
+            contentHeight: content ? content.scrollHeight : 'N/A',
+            windowHeight: window.innerHeight
+        });
+        
+        // Handle wheel events like Flutter does
+        flutterView.addEventListener('wheel', (event) => {
+            console.log('[Test Page] ===== WHEEL EVENT RECEIVED =====');
+            console.log('[Test Page] Event details:', {
+                deltaY: event.deltaY,
+                deltaMode: event.deltaMode,
+                clientX: event.clientX,
+                clientY: event.clientY,
+                bubbles: event.bubbles,
+                cancelable: event.cancelable,
+                defaultPrevented: event.defaultPrevented
+            });
+            
+            event.preventDefault();
+            
+            // Calculate scroll delta based on deltaMode
+            let deltaY = event.deltaY;
+            const originalDelta = deltaY;
+            
+            // Convert to pixels based on deltaMode
+            if (event.deltaMode === 1) { // LINE mode
+                deltaY *= 16; // Approximate line height
+                console.log('[Test Page] LINE mode: converted', originalDelta, 'lines to', deltaY, 'pixels');
+            } else if (event.deltaMode === 2) { // PAGE mode
+                deltaY *= window.innerHeight;
+                console.log('[Test Page] PAGE mode: converted', originalDelta, 'pages to', deltaY, 'pixels');
+            } else {
+                console.log('[Test Page] PIXEL mode:', deltaY, 'pixels');
+            }
+            
+            const oldPosition = scrollPosition;
+            
+            // Update scroll position
+            scrollPosition += deltaY;
+            
+            // Clamp scroll position
+            const maxScroll = content.scrollHeight - window.innerHeight;
+            scrollPosition = Math.max(0, Math.min(scrollPosition, maxScroll));
+            
+            console.log('[Test Page] Scroll update:', {
+                oldPosition: oldPosition,
+                newPosition: scrollPosition,
+                maxScroll: maxScroll,
+                deltaApplied: scrollPosition - oldPosition
+            });
+            
+            // Apply transform to simulate Flutter's scrolling
+            content.style.transform = `translateY(-${scrollPosition}px)`;
+            content.style.transition = 'transform 0.1s ease-out';
+            
+            console.log('[Test Page] Transform applied:', content.style.transform);
+            console.log('[Test Page] ===== WHEEL EVENT COMPLETE =====');
+            
+            return false;
+        }, { passive: false });
+        
+        // Add mouseover/mousemove handlers (Flutter expects these)
+        flutterView.addEventListener('mouseover', (event) => {
+            console.log('[Test Page] Mouse over Flutter view at', event.clientX, event.clientY);
+        });
+        
+        flutterView.addEventListener('mousemove', (event) => {
+            // Flutter tracks mouse position (not logging to avoid spam)
+        });
+        
+        // Mark this as a Flutter app by adding flt-glass-pane (for older Flutter)
+        const glassPane = document.createElement('div');
+        glassPane.setAttribute('flt-glass-pane', '');
+        glassPane.style.cssText = 'position: absolute; pointer-events: none;';
+        flutterView.appendChild(glassPane);
+        
+        // Add Flutter renderer marker
+        document.body.setAttribute('flt-renderer', 'html');
+        
+        console.log('[Test Page] ==================================');
+        console.log('[Test Page] Flutter web scroll test page loaded');
+        console.log('[Test Page] Flutter view element:', flutterView);
+        console.log('[Test Page] Has flt-glass-pane:', !!document.querySelector('[flt-glass-pane]'));
+        console.log('[Test Page] Has flt-renderer attr:', document.body.hasAttribute('flt-renderer'));
+        console.log('[Test Page] Ready for testing!');
+        console.log('[Test Page] ==================================');
+        
+        // Log current scroll state every 2 seconds for debugging
+        setInterval(() => {
+            if (scrollPosition > 0) {
+                console.log('[Test Page] Current scroll position:', scrollPosition);
+            }
+        }, 2000);
+    </script>
+</body>
+</html>
+

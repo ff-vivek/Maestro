@@ -105,6 +105,14 @@ interface Driver {
 
     fun setAndroidChromeDevToolsEnabled(enabled: Boolean) = Unit
 
+    fun switchTab(index: Int) {
+        throw UnsupportedOperationException("switchTab is not supported on this driver")
+    }
+
+    fun getTabCount(): Int {
+        throw UnsupportedOperationException("getTabCount is not supported on this driver")
+    }
+
     fun queryOnDeviceElements(query: OnDeviceElementQuery): List<TreeNode> {
         return listOf()
     }

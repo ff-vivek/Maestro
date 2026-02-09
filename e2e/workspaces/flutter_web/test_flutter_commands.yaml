@@ -1,0 +1,130 @@
+url: http://localhost:8001/e2e/workspaces/flutter_web_identifier/test_flutter_commands.html
+---
+# Flutter Web Commands Test
+# This test verifies which Maestro commands work properly with Flutter web apps
+# 
+# Commands tested:
+# 1. tap - Click on elements
+# 2. longPress - Press and hold on elements  
+# 3. inputText - Type text into input fields
+# 4. eraseText - Delete text from input fields
+# 5. pressKey - Press keyboard keys (Enter, Backspace)
+# 6. swipe/scroll - Scroll the page (already has Flutter support)
+
+- launchApp
+
+# Verify page loaded
+- assertVisible: "Flutter Web Commands Test Page"
+
+# ============================================
+# TEST 1: Tap Command
+# ============================================
+- tapOn: "Test 1: Tap Command"
+
+# Try to tap the button
+- tapOn: "Tap Me"
+
+# Wait a moment for the UI to update
+- evalScript: "return true"
+
+# Check if tap was detected
+# If this fails, tap doesn't work for Flutter web
+- assertVisible: "Status: Tap detected!"
+
+# ============================================
+# TEST 2: Long Press Command  
+# ============================================
+# First scroll to make long press section visible
+- swipe:
+    direction: UP
+    duration: 200
+
+- assertVisible: "Test 2: Long Press Command"
+
+# Try long press on the button
+- longPressOn: "Long Press Me"
+
+# Check if long press was detected
+# If this fails, longPress doesn't work for Flutter web
+- assertVisible: "Status: Long press detected!"
+
+# ============================================
+# TEST 3: Input Text Command
+# ============================================
+# Scroll to input section
+- swipe:
+    direction: UP
+    duration: 100
+
+- assertVisible: "Test 3: Input Text Command"
+
+# Tap on the input field to focus it
+- tapOn:
+    id: "text-input"
+
+# Type some text
+- inputText: "Hello Maestro"
+
+# Verify text was entered
+# If this fails, inputText doesn't work for Flutter web
+- assertVisible: "Status: Text entered!"
+- assertVisible: 'Current value: "Hello Maestro"'
+
+# ============================================
+# TEST 4: Erase Text Command
+# ============================================
+# Scroll to erase section
+- swipe:
+    direction: UP
+    duration: 200
+
+- assertVisible: "Test 4: Erase Text Command"
+
+# Tap on the input field with pre-filled text
+- tapOn:
+    id: "erase-input"
+
+# Erase all 16 characters ("Delete this text")
+- eraseText: 16
+
+# Verify text was erased
+# If this fails, eraseText doesn't work for Flutter web
+- assertVisible: "Status: All text erased!"
+- assertVisible: "Characters remaining: 0"
+
+# ============================================
+# TEST 5: Press Key Command (Enter)
+# ============================================
+# Scroll to press key section
+- swipe:
+    direction: UP
+    duration: 200
+
+- assertVisible: "Test 5: Press Key Command"
+
+# Tap on the input field to focus it
+- tapOn:
+    id: "presskey-input"
+
+# Press the Enter key
+- pressKey: Enter
+
+# Verify Enter was detected
+# If this fails, pressKey doesn't work for Flutter web
+- assertVisible: "Status: Enter key pressed!"
+
+# ============================================
+# TEST 6: Scroll Command (Already has Flutter support)
+# ============================================
+# Scroll to bottom to find the footer
+- scroll
+
+# Verify we reached the bottom
+- assertVisible: "END OF PAGE - All Tests Above"
+- assertVisible: "Scroll successful - you found the bottom!"
+
+# ============================================
+# SUMMARY
+# ============================================
+# If all assertions pass, all commands work with Flutter web
+# If specific assertions fail, those commands need Flutter-specific handling

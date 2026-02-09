@@ -1,0 +1,161 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Form Submission Example
+# ═══════════════════════════════════════════════════════════════════════════════
+# Description: Tests a complex form with dropdowns, text inputs, and file upload
+# Prerequisites: User is logged in and navigated to the form page
+# ═══════════════════════════════════════════════════════════════════════════════
+
+url: http://localhost:4446
+name: Form Submission with Validation
+tags:
+  - forms
+  - regression
+  - P1
+
+env:
+  USERNAME: testuser@example.com
+  PASSWORD: SecurePassword123
+  FORM_LINK: "https://example.com/resource"
+  BULLET_POINT_1: "Important: Check your account balance regularly"
+  BULLET_POINT_2: "Reminder: Update your contact information"
+
+---
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Setup: Launch, Login, and Navigate
+# ─────────────────────────────────────────────────────────────────────────────
+- launchApp
+- assertVisible: "Login To Application"
+
+# Login
+- tapOn: "Enter your User ID"
+- inputText: "${USERNAME}"
+- tapOn: "Enter your password"
+- inputText: "${PASSWORD}"
+- tapOn:
+    flutterId: submit_button
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# Navigate to form page
+- assertVisible: "Menu button for navigation"
+- tapOn: "Menu button for navigation"
+- tapOn: "Broadcast"
+- tapOn: "Bulk Communication"
+- waitForAnimationToEnd:
+    timeout: 2000
+
+- takeScreenshot: 01_form_page_loaded
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Test 1: Select Dropdown Option
+# ─────────────────────────────────────────────────────────────────────────────
+- tapOn:
+    flutterId: broadcast_type_dropdown
+    label: "Open broadcast type dropdown"
+- takeScreenshot: 02_dropdown_opened
+
+- tapOn: 
+    text: "WhatsApp Alert"
+    label: "Select WhatsApp Alert option"
+- takeScreenshot: 03_option_selected
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Test 2: Upload File (if file picker available)
+# ─────────────────────────────────────────────────────────────────────────────
+- tapOn:
+    flutterId: whatsapp_upload_button
+    optional: true
+    label: "Click upload button"
+- takeScreenshot: 04_upload_clicked
+
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# Verify file was selected (if upload dialog worked)
+- assertVisible:
+    text: ".*\\.txt"
+    optional: true
+    label: "Verify a file is selected"
+- takeScreenshot: 05_file_selected
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Test 3: Fill Text Fields
+# ─────────────────────────────────────────────────────────────────────────────
+- tapOn: 
+    text: "Enter Link"
+    label: "Focus on link field"
+- inputText: "${FORM_LINK}"
+- takeScreenshot: 06_link_entered
+
+- tapOn: 
+    text: "Enter Bullet Point 1"
+    label: "Focus on first bullet point"
+- inputText: "${BULLET_POINT_1}"
+- takeScreenshot: 07_bullet1_entered
+
+- tapOn: 
+    text: "Enter Bullet Point 2"
+    label: "Focus on second bullet point"
+- inputText: "${BULLET_POINT_2}"
+- takeScreenshot: 08_bullet2_entered
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Test 4: Date Picker Interaction
+# ─────────────────────────────────────────────────────────────────────────────
+- tapOn: 
+    text: "Select Date"
+    label: "Open date picker"
+- takeScreenshot: 09_date_picker_opened
+
+# Select day 15 (using regex to match any month)
+- tapOn: 
+    text: "15.*"
+    label: "Select day 15"
+- takeScreenshot: 10_day_selected
+
+# Confirm date selection
+- tapOn: "OK"
+- takeScreenshot: 11_date_confirmed
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Test 5: Form Validation Before Submit
+# ─────────────────────────────────────────────────────────────────────────────
+# Verify all fields are filled (visual check via screenshot)
+- takeScreenshot: 12_form_completed
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Test 6: Submit Form
+# ─────────────────────────────────────────────────────────────────────────────
+- tapOn: 
+    text: "Send"
+    label: "Submit the form"
+- takeScreenshot: 13_form_submitted
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Test 7: Verify Success Message
+# ─────────────────────────────────────────────────────────────────────────────
+- waitForAnimationToEnd:
+    timeout: 3000
+
+- assertVisible:
+    text: ".*Sent Successfully.*"
+    timeout: 10000
+    label: "Verify success message"
+- takeScreenshot: 14_success_message
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Alternative: Handle Error Case (Optional)
+# ─────────────────────────────────────────────────────────────────────────────
+# If there's an error, capture it
+- runFlow:
+    when:
+      visible: "Error"
+    commands:
+      - takeScreenshot: error_state
+      - copyTextFrom:
+          text: "Error.*"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Test Complete
+# ═══════════════════════════════════════════════════════════════════════════════

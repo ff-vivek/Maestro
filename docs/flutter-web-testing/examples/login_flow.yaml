@@ -1,0 +1,84 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Login Flow Example
+# ═══════════════════════════════════════════════════════════════════════════════
+# Description: Complete login test for a Flutter Web application
+# Prerequisites: Flutter app running on localhost:4446
+# ═══════════════════════════════════════════════════════════════════════════════
+
+url: http://localhost:4446
+name: User Login Flow
+tags:
+  - smoke
+  - authentication
+  - P1
+
+# Environment variables (can be overridden with -e flag)
+env:
+  USERNAME: testuser@example.com
+  PASSWORD: SecurePassword123
+
+---
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Step 1: Launch Application
+# ─────────────────────────────────────────────────────────────────────────────
+- launchApp
+- takeScreenshot: 01_app_launched
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Step 2: Verify Login Screen Loaded
+# ─────────────────────────────────────────────────────────────────────────────
+- assertVisible: "Login To Application"
+- takeScreenshot: 02_login_screen_visible
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Step 3: Enter User ID
+# ─────────────────────────────────────────────────────────────────────────────
+- tapOn: "Enter your User ID"
+- inputText: "${USERNAME}"
+- takeScreenshot: 03_username_entered
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Step 4: Enter Password
+# ─────────────────────────────────────────────────────────────────────────────
+- tapOn: "Enter your password"
+- inputText: "${PASSWORD}"
+- takeScreenshot: 04_password_entered
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Step 5: Submit Login Form
+# ─────────────────────────────────────────────────────────────────────────────
+- waitForAnimationToEnd:
+    timeout: 1000
+    label: "Wait for form to be ready"
+
+- tapOn:
+    flutterId: submit_button
+    label: "Click login button"
+- takeScreenshot: 05_login_submitted
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Step 6: Wait for Navigation
+# ─────────────────────────────────────────────────────────────────────────────
+- waitForAnimationToEnd:
+    timeout: 3000
+    label: "Wait for dashboard to load"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Step 7: Verify Successful Login
+# ─────────────────────────────────────────────────────────────────────────────
+- assertVisible: 
+    text: "Dashboard"
+    timeout: 10000
+    label: "Verify dashboard is visible"
+
+- assertNotVisible:
+    text: "Login"
+    optional: true
+    label: "Verify login form is gone"
+
+- takeScreenshot: 06_login_successful
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Test Complete
+# ═══════════════════════════════════════════════════════════════════════════════

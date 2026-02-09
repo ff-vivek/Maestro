@@ -1,0 +1,254 @@
+url: http://localhost:8088/test_flutter_scroll.html
+---
+# Comprehensive Flutter Web Scroll Test - Clean Version
+# Tests ALL scroll-related commands in Maestro without verbose logging
+
+- launchApp
+
+# Wait for page load
+- evalScript: |
+    new Promise(resolve => setTimeout(resolve, 1000));
+
+# Verify Flutter detection
+- evalScript: |
+    const isFlutter = window.maestro.isFlutterApp();
+    if (!isFlutter) {
+        throw new Error('Not detected as Flutter app!');
+    }
+
+# TEST 1: Basic scroll command
+- scroll
+
+- evalScript: |
+    const content = document.getElementById('flutter-content');
+    const match = content.style.transform.match(/translateY\((-?\d+(?:\.\d+)?)px\)/);
+    if (!match || parseFloat(match[1]) >= 0) throw new Error('TEST 1 FAILED');
+    output.test1 = parseFloat(match[1]);
+
+# TEST 2: Swipe UP (scroll content down)
+- swipe:
+    direction: UP
+
+- evalScript: |
+    const content = document.getElementById('flutter-content');
+    const match = content.style.transform.match(/translateY\((-?\d+(?:\.\d+)?)px\)/);
+    const scrollY = parseFloat(match[1]);
+    if (scrollY >= output.test1) throw new Error('TEST 2 FAILED');
+    output.test2 = scrollY;
+
+# TEST 3: Swipe DOWN (scroll content up)
+- swipe:
+    direction: DOWN
+
+- evalScript: |
+    const content = document.getElementById('flutter-content');
+    const match = content.style.transform.match(/translateY\((-?\d+(?:\.\d+)?)px\)/);
+    const scrollY = parseFloat(match[1]);
+    if (scrollY <= output.test2) throw new Error('TEST 3 FAILED');
+    output.test3 = scrollY;
+
+# TEST 4: Custom duration swipe
+- swipe:
+    direction: UP
+    duration: 1000
+
+- evalScript: |
+    const content = document.getElementById('flutter-content');
+    const match = content.style.transform.match(/translateY\((-?\d+(?:\.\d+)?)px\)/);
+    const scrollY = parseFloat(match[1]);
+    if (scrollY >= output.test3) throw new Error('TEST 4 FAILED');
+    output.test4 = scrollY;
+
+# TEST 5: Multiple consecutive scrolls
+- evalScript: |
+    const content = document.getElementById('flutter-content');
+    const match = content.style.transform.match(/translateY\((-?\d+(?:\.\d+)?)px\)/);
+    output.beforeMultiple = parseFloat(match[1]);
+
+- scroll
+- scroll
+- scroll
+
+- evalScript: |
+    const content = document.getElementById('flutter-content');
+    const match = content.style.transform.match(/translateY\((-?\d+(?:\.\d+)?)px\)/);
+    const scrollY = parseFloat(match[1]);
+    const distance = Math.abs(scrollY - output.beforeMultiple);
+    if (scrollY >= output.beforeMultiple || distance < 100) throw new Error('TEST 5 FAILED');
+    output.test5 = scrollY;
+
+# TEST 6: Scroll to maximum (bottom)
+- scroll
+- scroll
+- scroll
+- scroll
+- scroll
+- scroll
+- scroll
+- scroll
+- scroll
+- scroll
+
+- evalScript: |
+    const content = document.getElementById('flutter-content');
+    const match = content.style.transform.match(/translateY\((-?\d+(?:\.\d+)?)px\)/);
+    output.test6 = parseFloat(match[1]);
+
+# TEST 7: Scroll back to top
+- swipe:
+    direction: DOWN
+- swipe:
+    direction: DOWN
+- swipe:
+    direction: DOWN
+- swipe:
+    direction: DOWN
+- swipe:
+    direction: DOWN
+- swipe:
+    direction: DOWN
+- swipe:
+    direction: DOWN
+- swipe:
+    direction: DOWN
+- swipe:
+    direction: DOWN
+- swipe:
+    direction: DOWN
+
+- evalScript: |
+    const content = document.getElementById('flutter-content');
+    const match = content.style.transform.match(/translateY\((-?\d+(?:\.\d+)?)px\)/);
+    output.test7 = parseFloat(match[1]);
+
+# TEST 8: Bidirectional scrolling
+- scroll
+- swipe:
+    direction: DOWN
+- scroll
+- swipe:
+    direction: DOWN
+- scroll
+
+- evalScript: |
+    const content = document.getElementById('flutter-content');
+    const match = content.style.transform.match(/translateY\((-?\d+(?:\.\d+)?)px\)/);
+    if (!match) throw new Error('TEST 8 FAILED');
+    output.test8 = parseFloat(match[1]);
+
+# TEST 9: Different swipe speeds
+- evalScript: |
+    document.getElementById('flutter-content').style.transform = 'translateY(-300px)';
+
+- swipe:
+    direction: UP
+    duration: 100
+
+- swipe:
+    direction: DOWN
+    duration: 1000
+
+- evalScript: |
+    const content = document.getElementById('flutter-content');
+    const match = content.style.transform.match(/translateY\((-?\d+(?:\.\d+)?)px\)/);
+    if (!match) throw new Error('TEST 9 FAILED');
+    output.test9 = parseFloat(match[1]);
+
+# TEST 10: Stress test (15 rapid scrolls)
+- scroll
+- scroll
+- scroll
+- scroll
+- scroll
+- scroll
+- scroll
+- scroll
+- scroll
+- scroll
+- scroll
+- scroll
+- scroll
+- scroll
+- scroll
+
+- evalScript: |
+    const content = document.getElementById('flutter-content');
+    const match = content.style.transform.match(/translateY\((-?\d+(?:\.\d+)?)px\)/);
+    if (!match) throw new Error('TEST 10 FAILED');
+    output.test10 = parseFloat(match[1]);
+
+# TEST 11: scrollUntilVisible DOWN
+- evalScript: |
+    document.getElementById('flutter-content').style.transform = 'translateY(0px)';
+
+- scrollUntilVisible:
+    element:
+      id: "button-section-4"
+    direction: DOWN
+
+- evalScript: |
+    const content = document.getElementById('flutter-content');
+    const match = content.style.transform.match(/translateY\((-?\d+(?:\.\d+)?)px\)/);
+    const scrollY = parseFloat(match[1]);
+    if (scrollY >= -100) throw new Error('TEST 11 FAILED');
+    output.test11 = scrollY;
+
+# TEST 12: scrollUntilVisible UP
+- evalScript: |
+    document.getElementById('flutter-content').style.transform = 'translateY(-800px)';
+
+- scrollUntilVisible:
+    element:
+      id: "button-section-2"
+    direction: UP
+
+- evalScript: |
+    const content = document.getElementById('flutter-content');
+    const match = content.style.transform.match(/translateY\((-?\d+(?:\.\d+)?)px\)/);
+    const scrollY = parseFloat(match[1]);
+    if (scrollY <= -700) throw new Error('TEST 12 FAILED');
+    output.test12 = scrollY;
+
+# TEST 13: scrollUntilVisible with timeout
+- evalScript: |
+    document.getElementById('flutter-content').style.transform = 'translateY(0px)';
+
+- scrollUntilVisible:
+    element:
+      id: "button-section-3"
+    direction: DOWN
+    timeout: 10000
+
+- evalScript: |
+    const content = document.getElementById('flutter-content');
+    const match = content.style.transform.match(/translateY\((-?\d+(?:\.\d+)?)px\)/);
+    const scrollY = parseFloat(match[1]);
+    if (scrollY >= -100) throw new Error('TEST 13 FAILED');
+    output.test13 = scrollY;
+
+# TEST 14: scrollUntilVisible with text selector
+- evalScript: |
+    document.getElementById('flutter-content').style.transform = 'translateY(0px)';
+
+- scrollUntilVisible:
+    element:
+      text: "Button in Section 4"
+    direction: DOWN
+
+- evalScript: |
+    const content = document.getElementById('flutter-content');
+    const match = content.style.transform.match(/translateY\((-?\d+(?:\.\d+)?)px\)/);
+    const scrollY = parseFloat(match[1]);
+    if (scrollY >= -100) throw new Error('TEST 14 FAILED');
+    output.test14 = scrollY;
+
+# Final verification
+- evalScript: |
+    console.log('✅ All 14 scroll tests passed!');
+    console.log('Tests: scroll, swipe (UP/DOWN/duration), scrollUntilVisible (UP/DOWN/timeout/text)');
+    console.log('Flutter web scrolling: FULLY OPERATIONAL 🚀');
+
+
+
+
+

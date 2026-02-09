@@ -64,20 +64,30 @@ export default function ElementsPanel({ closePanel }: ElementsPanelProps) {
       return [];
     }
     const filteredElements = deviceScreen.elements.filter((element) => {
+      // Check if element has any identifiable properties
+      const hasCustomIdentifiers = element.customIdentifiers && Object.keys(element.customIdentifiers).length > 0;
       if (
         !element.text &&
         !element.resourceId &&
         !element.hintText &&
-        !element.accessibilityText
+        !element.accessibilityText &&
+        !hasCustomIdentifiers
       )
         return false;
+
+      // Check if query matches any custom identifier values
+      const matchesCustomIdentifier = element.customIdentifiers && 
+        Object.values(element.customIdentifiers).some(value => 
+          value.toLowerCase().includes(query.toLowerCase())
+        );
 
       return (
         !query ||
         element.text?.toLowerCase().includes(query.toLowerCase()) ||
         element.resourceId?.toLowerCase().includes(query.toLowerCase()) ||
         element.hintText?.toLowerCase().includes(query.toLowerCase()) ||
-        element.accessibilityText?.toLowerCase().includes(query.toLowerCase())
+        element.accessibilityText?.toLowerCase().includes(query.toLowerCase()) ||
+        matchesCustomIdentifier
       );
     });
 
@@ -241,6 +251,21 @@ export default function ElementsPanel({ closePanel }: ElementsPanelProps) {
                     elementType="accessibilityText"
                   />
                 )}
+              {/* Render custom identifiers from selectorAliases */}
+              {item.customIdentifiers && Object.entries(item.customIdentifiers).map(([key, value]) => (
+                value !== "" && value !== " " && (
+                  <ElementListItem
+                    key={key}
+                    onClick={onClick}
+                    isHovered={hoveredElement?.id === item?.id}
+                    onMouseEnter={onMouseEnter}
+                    onMouseLeave={onMouseLeave}
+                    query={query as string}
+                    text={value}
+                    elementType={key as any}
+                  />
+                )
+              ))}
             </div>
           );
         })}
@@ -264,7 +289,7 @@ interface ElementListItemProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   query: string;
   text: string;
-  elementType: "id" | "text" | "hintText" | "accessibilityText";
+  elementType: string; // Allow any string for custom identifiers like "flutterId"
   isHovered: boolean;
 }
 
